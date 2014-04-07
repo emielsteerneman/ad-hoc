@@ -87,7 +87,7 @@ public class NetworkInterface extends Thread {
 		}
 	}
 	
-	public void receive(DatagramPacket packet) throws IOException {
+	private void receive(DatagramPacket packet) throws IOException {
 		byte[] packetData = packet.getData();
 		
 		InetAddress sourceAddress = InetAddress.getByAddress(Arrays.copyOfRange(packetData, 0, 4));

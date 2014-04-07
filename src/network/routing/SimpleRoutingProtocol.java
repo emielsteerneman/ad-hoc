@@ -13,11 +13,10 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 		if (!networkPacket.getDestinationAddress().equals(InetAddress.getLocalHost())) {
 			if (networkPacket.getSourceAddress().equals(InetAddress.getLocalHost())) {
 				return;
-			} 
+			}
 			
-			if (networkPacket.getHopcount() > 0){
+			if (networkPacket.getHopcount() > 0) {
 				networkPacket.decrementHopcount();
-				
 				networkInterface.send(networkPacket);
 			} else {
 				return;
