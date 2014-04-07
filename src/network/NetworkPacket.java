@@ -49,6 +49,14 @@ public class NetworkPacket {
 		this.hopcount = hopcount;
 	}
 	
+	public void incrementHopcount() {
+		this.hopcount++;
+	}
+	
+	public void decrementHopcount() {
+		this.hopcount--;
+	}
+	
 	public void setData(byte[] data) {
 		this.data = data;
 	}

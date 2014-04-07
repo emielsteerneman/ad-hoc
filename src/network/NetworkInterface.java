@@ -7,6 +7,9 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Arrays;
 
+import network.routing.RoutingProtocol;
+import network.routing.SimpleRoutingProtocol;
+
 public class NetworkInterface extends Thread {
 	private static final int PORT = 4446;
 	private static final String GROUP = "226.2.2.2";
@@ -14,17 +17,14 @@ public class NetworkInterface extends Thread {
 	
 	private MulticastSocket receiveSocket = null;
 	private DatagramSocket sendSocket = null;
-	private NetworkListener listener = null;
+	
+	private NetworkListener networkListener = null;
+	private RoutingProtocol routingProtocol = new SimpleRoutingProtocol();
 	
 	public NetworkInterface() throws IOException {
 		receiveSocket = new MulticastSocket(PORT);
 		receiveSocket.joinGroup(InetAddress.getByName(GROUP));
-		
 		sendSocket = new DatagramSocket();
-	}
-	
-	public void setListener(NetworkListener listener) {
-		this.listener = listener;
 	}
 	
 	@Override
@@ -36,20 +36,26 @@ public class NetworkInterface extends Thread {
 			
 			try {
 				receiveSocket.receive(packet);
-				
-				if (listener != null) {
-					try {
-						receive(packet);
-					} catch (IOException e){ 
-						
-					}
-				}
 			} catch (IOException e) {
 				running = false;
+			}
+			
+			if (packet != null) {
+				try {
+					receive(packet);
+				} catch (IOException e){ }
 			}
 		}
 		
 		receiveSocket.close();
+	}
+	
+	public void setListener(NetworkListener listener) {
+		this.networkListener = listener;
+	}
+	
+	public void setRoutingProtocol(RoutingProtocol routingProtocol) {
+		this.routingProtocol = routingProtocol;
 	}
 	
 	public void send(NetworkPacket networkPacket) throws IOException {
@@ -75,7 +81,13 @@ public class NetworkInterface extends Thread {
 		sendSocket.send(packet);
 	}
 	
-	private void receive(DatagramPacket packet) throws IOException {
+	public void process(NetworkPacket networkPacket) {
+		if (networkListener != null) {
+			networkListener.onReceive(networkPacket);
+		}
+	}
+	
+	public void receive(DatagramPacket packet) throws IOException {
 		byte[] packetData = packet.getData();
 		
 		InetAddress sourceAddress = InetAddress.getByAddress(Arrays.copyOfRange(packetData, 0, 4));
@@ -87,28 +99,10 @@ public class NetworkInterface extends Thread {
 				       (packetData[11] <<  0);
 		
 		byte[] data = Arrays.copyOfRange(packetData, 12, packet.getLength());
+
+		NetworkPacket networkPacket = new NetworkPacket(sourceAddress, destinationAddress, hopcount, data);
 		
-		if (sourceAddress != null && destinationAddress != null) {
-			if (!destinationAddress.equals(InetAddress.getLocalHost())) {
-				if (sourceAddress.equals(InetAddress.getLocalHost())) {
-					return;
-				} 
-				
-				if (hopcount > 0){
-					hopcount--;
-					
-					send(new NetworkPacket(sourceAddress, destinationAddress, hopcount, data));
-				} else {
-					return;
-				}
-			} else {
-				if (hopcount == 0) {
-					listener.onReceive(new NetworkPacket(sourceAddress, destinationAddress, hopcount, data));
-				} else {
-					return;
-				}
-			}
-		}
+		routingProtocol.rout(networkPacket, this);
 	}
 	
 }
