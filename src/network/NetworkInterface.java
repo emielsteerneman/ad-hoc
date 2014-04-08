@@ -5,25 +5,33 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import network.routing.RoutingProtocol;
-import network.routing.SimpleRoutingProtocol;
 
 public class NetworkInterface extends Thread {
 	private static final int PORT = 4446;
 	private static final String GROUP = "226.2.2.2";
-	private static final int BUFFER_SIZE = 256;
 	
 	private MulticastSocket receiveSocket = null;
 	private DatagramSocket sendSocket = null;
+	private InetAddress localHost = null;
+	private InetAddress group = null;
+	
+	private static final int BUFFER_SIZE = 256;
 	
 	private NetworkListener networkListener = null;
-	private RoutingProtocol routingProtocol = new SimpleRoutingProtocol();
+	private RoutingProtocol routingProtocol = null;
 	
 	public NetworkInterface() throws IOException {
 		receiveSocket = new MulticastSocket(PORT);
-		receiveSocket.joinGroup(InetAddress.getByName(GROUP));
+		
+		localHost = InetAddress.getLocalHost();
+		group = InetAddress.getByName(GROUP);
+		
+		receiveSocket.joinGroup(group);
 		sendSocket = new DatagramSocket();
 	}
 	
@@ -50,6 +58,10 @@ public class NetworkInterface extends Thread {
 		receiveSocket.close();
 	}
 	
+	public InetAddress getLocalHost() {
+		return localHost;
+	}
+	
 	public void setListener(NetworkListener listener) {
 		this.networkListener = listener;
 	}
@@ -58,28 +70,6 @@ public class NetworkInterface extends Thread {
 		this.routingProtocol = routingProtocol;
 	}
 	
-	public void send(NetworkPacket networkPacket) throws IOException {
-		byte[] packetData = new byte[NetworkPacket.HEADER_SIZE + networkPacket.getLength()];
-		
-		byte[] sourceAddress = networkPacket.getSourceAddress().getAddress();
-		byte[] destinationAddress = networkPacket.getDestinationAddress().getAddress();
-		int hopcount = networkPacket.getHopcount();
-		byte[] data = networkPacket.getData();
-		
-		System.arraycopy(sourceAddress, 0, packetData, 0, 4);
-		System.arraycopy(destinationAddress, 0, packetData, 4, 4);
-		
-		packetData[8]  = (byte) (hopcount >> 24);
-		packetData[9]  = (byte) (hopcount >> 16);
-		packetData[10] = (byte) (hopcount >>  8);
-		packetData[11] = (byte) (hopcount >>  0);
-		
-		System.arraycopy(data, 0, packetData, 12, data.length);
-		
-		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, InetAddress.getByName(GROUP), PORT);
-		
-		sendSocket.send(packet);
-	}
 	
 	public void process(NetworkPacket networkPacket) {
 		if (networkListener != null) {
@@ -87,20 +77,36 @@ public class NetworkInterface extends Thread {
 		}
 	}
 	
+	public void send(NetworkPacket networkPacket) throws IOException {
+		byte[] packetData = networkPacket.getBytes();
+		
+		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, PORT);
+		
+		sendSocket.send(packet);
+	}
+	
 	private void receive(DatagramPacket packet) throws IOException {
 		byte[] packetData = packet.getData();
 		
+		byte flags = packetData[0];
+		byte hopcount = packetData[1];
+		byte headerSize = packetData[2];
+		byte reserved = packetData[3];
+		
 		InetAddress sourceAddress = InetAddress.getByAddress(Arrays.copyOfRange(packetData, 0, 4));
-		InetAddress destinationAddress = InetAddress.getByAddress(Arrays.copyOfRange(packetData, 4, 8));
 		
-		int hopcount = (packetData[8]  << 24) +
-				       (packetData[9]  << 16) +
-				       (packetData[10] <<  8) +
-				       (packetData[11] <<  0);
+		List<InetAddress> destinationAddresses = new ArrayList<>();
 		
-		byte[] data = Arrays.copyOfRange(packetData, 12, packet.getLength());
+		for (int i = 2; i < headerSize; i++) {
+			destinationAddresses.add(InetAddress.getByAddress(Arrays.copyOfRange(packetData, i * 4, (i * 4) + 4)));
+		}
+		
+		byte[] data = Arrays.copyOfRange(packetData, headerSize, packet.getLength());
 
-		NetworkPacket networkPacket = new NetworkPacket(sourceAddress, destinationAddress, hopcount, data);
+		NetworkPacket networkPacket = new NetworkPacket(sourceAddress, destinationAddresses, hopcount, data);
+		
+		networkPacket.setFlags(flags);
+		networkPacket.setReserved(reserved);
 		
 		routingProtocol.rout(networkPacket, this);
 	}

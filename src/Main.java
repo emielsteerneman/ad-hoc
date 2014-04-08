@@ -1,24 +1,24 @@
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 
-import network.NetworkPacket;
+import transport.ReliableChannel;
 import network.NetworkInterface;
 import network.NetworkListener;
+import network.NetworkPacket;
+import network.routing.SimpleRoutingProtocol;
 
 
 public class Main {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		NetworkInterface networkInterface = new NetworkInterface();
+		networkInterface.setRoutingProtocol(new SimpleRoutingProtocol());
 		
-		networkInterface.setListener(new NetworkListener() {
-			@Override
-			public void onReceive(NetworkPacket packet) {
-				System.out.println(new String(packet.getData()));
-			}
-		});
+		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.131.74"), networkInterface);
 		
-		networkInterface.start();
-		networkInterface.send(new NetworkPacket(InetAddress.getLocalHost(), InetAddress.getByName("130.89.131.74"), 2, "hoi".getBytes()));
+		OutputStream out = channel.getOutputStream();
+		
+		out.write("hallo\n".getBytes());
 	}
 	
 }
