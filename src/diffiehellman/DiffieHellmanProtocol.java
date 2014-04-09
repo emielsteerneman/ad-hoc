@@ -5,10 +5,8 @@ import java.util.Arrays;
 
 public class DiffieHellmanProtocol {
 
-	private long a = 6; // secret integer host A, kan random gemaakt
-								// worden.
-	private long b = 12; // secret integer host B, wordt door host B
-								// random gegenereerd.
+	private long a = 6; // secret integer host A, kan random gemaakt worden.
+	private long b = 12; // secret integer host B, wordt door host B random gegenereerd.
 	private long s; // secret
 	private long p; // prime
 	private long g = 2; // grondgetal
@@ -16,45 +14,37 @@ public class DiffieHellmanProtocol {
 	private long B; // secret host B
 	
 	public DiffieHellmanProtocol(){
+		long start = System.currentTimeMillis();
+		
 		generateOwnKey();
 		generateOtherKey();
 		generateKey();
+		
+		System.out.printf("\nDuration: %d ms", (System.currentTimeMillis() - start));
 	}
 
 	public long generateOwnKey() {
 		setP( PrimeGenerator.generatePrime());
+		System.out.println("__________________________________");
 		System.out.println("Starting to calculate my own key..");
-		System.out.println("-------------------");
 		A = (long) (Math.pow(g, a) % p);
 		System.out.println("Key calculated!: " + A);
-		System.out.println("-------------------");
 		return A;
-	}
-	
-	private void setP(long a){
-		
-		p = a;
-	}
-	
-	private void setG(long b){
-		g = b;
 	}
 
 	public long generateOtherKey() {
+		System.out.println("__________________________________");
 		System.out.println("Starting to calculate the other host's key...");
-		System.out.println("-------------------");
 		B = (long) (Math.pow(g, b) % p);
 		System.out.println("Key calculated!:" + B);
-		System.out.println("-------------------");
 		return B;
 	}
 
 	public long generateKey() {
+		System.out.println("__________________________________");
 		System.out.println("Starting to calculate the secret key...");
-		System.out.println("-------------------");
 		s = (long) (Math.pow(B, a) % p);
 		System.out.println("Key calculated!: " + s);
-		System.out.println("-------------------");
 
 		return s;
 	}
@@ -83,7 +73,6 @@ public class DiffieHellmanProtocol {
 		System.out.println("Decrypting message ...");
 		System.out.println("Decrypted message: " + finalMessage);
 		return finalMessage;
-
 	}
 
 	public byte[] XOR(byte[] message, byte[] secretKey) {
@@ -104,13 +93,19 @@ public class DiffieHellmanProtocol {
 		buffer.putLong(x);
 		return buffer.array();
 	}
-
+	
+	private void setP(long a){
+		p = a;
+	}
+	
+	private void setG(long b){
+		g = b;
+	}
+	
 	// @TODO: implement een manier om als een connector een p en g af te spreken
 	// met de geconnecteerde.
 
 	public static void main(String[] argv) {
 		new DiffieHellmanProtocol();
-	
 	}
-
 }

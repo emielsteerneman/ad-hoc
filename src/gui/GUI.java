@@ -384,16 +384,10 @@ public class GUI extends JFrame{
 	
 	public void startPrivateChat(){
 			ca.startPrivateChat();
-			
 	}
 	
 	public void disconnect() throws IOException{
-		
 		ca.disconnect();
-
-		//close channel
-
-		
 	}
 	
 	public void send(String s) throws IOException{
@@ -455,7 +449,4 @@ public class GUI extends JFrame{
 	public static void main(String[] args){
 			
 	}
-	
-	
-	
 }
