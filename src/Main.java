@@ -14,6 +14,7 @@ public class Main {
 		// 130.89.130.15
 		// 55555
 		NetworkInterface networkInterface = new NetworkInterface(InetAddress.getByName("130.89.130.15"), 55555);
+		networkInterface.start();
 		
 		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.131.78"), InetAddress.getByName("190.89.131.74"), networkInterface);
 		
