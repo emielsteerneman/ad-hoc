@@ -27,6 +27,8 @@ public class ReliableChannel implements NetworkListener{
 
 	private PipedOutputStream pipedOut;
 	private PipedInputStream pipedIn;
+	private InputHandler inputHandler;
+	private QueueSender queueSender;
 	//QUEUE for important packets 
 	private ArrayList<TransportPacket> packetList = new ArrayList<TransportPacket>(); 
 	// private ArrayList<TranportPacket>
@@ -45,8 +47,12 @@ public class ReliableChannel implements NetworkListener{
 		pipedIn = new PipedInputStream();
 		out = new PipedOutputStream(pipedIn);
 
-		new InputHandler(pipedIn).start();
-		new QueueSender(packetList).start();
+		inputHandler = new InputHandler(pipedIn);
+		Thread t = (Thread)inputHandler;
+		t.start();
+		queueSender = new QueueSender(packetList);
+		Thread z = (Thread)queueSender;
+		z.start();
 	}
 
 	// Reads the queue of the channel and sends data in a windows. continues
@@ -58,7 +64,9 @@ public class ReliableChannel implements NetworkListener{
 		private int sendIndex;
 		private ArrayList<Integer> expectedACK;
 		private ArrayList<TransportPacket> currentWindow;
-
+		public void priorityPacket(TransportPacket packet){
+			currentWindow.set(0, packet);
+		}
 		public QueueSender(ArrayList<TransportPacket> queue) {
 			this.sendQueue = queue;
 			expectedACK = new ArrayList<Integer>();
@@ -251,7 +259,21 @@ public class ReliableChannel implements NetworkListener{
 		//Check whether incoming packet is for local ip
 		if(packet.getDestinationAddresses().equals(localAddress)){
 			//Check whether packet is an ACK
-			if(packet.get)
+			TransportPacket received = TransportPacket.parseBytes(packet.getBytes());
+			if(received!=null){
+				if(received.getAcknowledgeNumber()!=-1){
+					//React to ACK
+				}else{
+					//IF ACK field == -1 -> data packet
+					//-> add to queue and send ack
+			
+					TransportPacket transportPacket = new TransportPacket(0, received.getAcknowledgeNumber(),(byte) 0, received.getStreamNumber(), null);
+					queueSender.priorityPacket(transportPacket);
+					
+					//Set packet data
+					
+				}
+			}
 		}
 		
 		
