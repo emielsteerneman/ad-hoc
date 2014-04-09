@@ -77,7 +77,7 @@ public class ReliableChannel implements NetworkListener{
 		 */
 		private void fillWindow(){
 			int index = 0;
-			boolean println = false;
+	
 			while (currentWindow.size() < WNDSZ && sendQueue.size() > 0) {
 				// System.out.print("filling window--");
 				TransportPacket t = null;
@@ -89,20 +89,17 @@ public class ReliableChannel implements NetworkListener{
 				} else {
 					// If not continue polling and adding expected ACK's
 //					sendQueue.poll();
-					println = true;
 					expectedACK.add(t.getAcknowledgeNumber());
 					currentWindow.add(t);
 					// Reset sendIndex to 0 to start at the beginning of
 					// each window
 					sendIndex = 0;
 					
-					System.out.print(t.getSequenceNumber()+", ");
+	
 				}
 				index++;
 			}
-			if(println){
-				System.out.println("");
-			}
+
 		}
 		@Override
 		// TODO: ACK, set ack/seq numbers of transportPackets, priority packets (replace first packet in send queue)
@@ -131,9 +128,6 @@ public class ReliableChannel implements NetworkListener{
 					if (currentWindow.size() > 0) {
 						if (sendIndex < currentWindow.size()) {
 
-							System.out.println("packet" + (sendIndex + 1)
-									+ " | " + currentWindow.size());
-
 							NetworkPacket networkPacket = new NetworkPacket(
 									localAddress, address, (byte) 2,
 									currentWindow.get(sendIndex).getBytes());
@@ -154,7 +148,7 @@ public class ReliableChannel implements NetworkListener{
 							if (expectedACK.size() == 0) {
 								// IF list empty: all packets have been acked ->
 								// new Stream
-								System.out.println("window empty. removing send packets from list");
+//								System.out.println("window empty. removing send packets from list");
 								for(int i=0; i<currentWindow.size();i++){
 									sendQueue.remove(0);
 								}
@@ -256,6 +250,7 @@ public class ReliableChannel implements NetworkListener{
 
 	@Override
 	public void onReceive(NetworkPacket packet) {
+		System.out.println("INCOMMING!");
 		//Check whether incoming packet is for local ip
 		if(packet.getDestinationAddresses().equals(localAddress)){
 			//Check whether packet is an ACK

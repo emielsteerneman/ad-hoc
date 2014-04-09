@@ -14,6 +14,7 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 	
 	@Override
 	public void rout(NetworkPacket networkPacket) throws IOException {
+		System.out.println("ROUT");
 		if (!networkPacket.getDestinationAddresses().contains(networkInterface.getLocalHost())) {
 			if (networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
 				return;

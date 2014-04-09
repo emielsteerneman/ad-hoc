@@ -10,11 +10,14 @@ import transport.ReliableChannel;
 public class Main {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		NetworkInterface networkInterface = new NetworkInterface(InetAddress.getByName("226.2.2.2"), 4446);
+//		NetworkInterface receivernetworkInterface = new NetworkInterface(InetAddress.getByName("226.2.2.2"), 4446);
 		
 		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.131.78"),InetAddress.getByName("190.89.131.74"), networkInterface);
+//		ReliableChannel receiver = new ReliableChannel(InetAddress.getByName("190.89.131.74"),InetAddress.getByName("130.89.131.78"),networkInterface);
 		
 		networkInterface.addNetworkListener(channel);
 		
+//		networkInterface.addNetworkListener(receiver);
 		OutputStream out = channel.getOutputStream();
 		byte[] s = new byte[200];
 		byte[] d = new byte[200];
