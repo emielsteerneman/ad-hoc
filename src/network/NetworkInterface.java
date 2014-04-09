@@ -13,17 +13,19 @@ import network.routing.RoutingProtocol;
 import network.routing.SimpleRoutingProtocol;
 
 public class NetworkInterface extends Thread {
+	public static final byte HOPCOUNT = 4;
+	
 	private static final int BUFFER_SIZE = 512;
 	private static final int TIME_OUT = 2000;
 	
 	private int port;
 	private InetAddress group;
 	
-	private InetAddress localHost;
-	
 	//private MulticastSocket receiveSocket;
 	private DatagramSocket receiveSocket;
 	private DatagramSocket sendSocket;	
+	
+	private InetAddress localHost;
 	
 	private List<NetworkListener> networkListeners;
 	private RoutingProtocol routingProtocol;
@@ -53,13 +55,13 @@ public class NetworkInterface extends Thread {
 		this.group = group;
 		this.port = port;
 		
-		this.localHost = InetAddress.getLocalHost();
-		
 		//this.receiveSocket = new MulticastSocket(port);
 		//this.receiveSocket.joinGroup(group);
 		this.receiveSocket = new DatagramSocket(port);
 		this.receiveSocket.setSoTimeout(TIME_OUT);
 		this.sendSocket = new DatagramSocket();
+		
+		this.localHost = receiveSocket.getLocalAddress();
 		
 		this.networkListeners = new ArrayList<>();
 		this.routingProtocol = new SimpleRoutingProtocol(this);
