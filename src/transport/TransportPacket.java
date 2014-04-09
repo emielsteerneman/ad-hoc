@@ -109,6 +109,32 @@ public class TransportPacket {
 	}
 
 	public static TransportPacket parseBytes(byte[] bytes) {
+		if (bytes.length < TransportPacket.HEADER_LENGTH) {
+			return null;
+		}
 		
+		int sequenceNumber = (bytes[0] << 24) +
+				             (bytes[1] << 16) +
+				             (bytes[2] <<  8) +
+				             (bytes[3] <<  0);
+		
+		int acknowledgeNumber = (bytes[4] << 24) +
+	                            (bytes[5] << 16) +
+	                            (bytes[6] <<  8) +
+	                            (bytes[7] <<  0);
+		
+		byte flags = bytes[8];
+		byte streamNumber = bytes[9];
+		byte reserved = bytes[10];
+		
+		byte[] data = new byte[bytes.length - TransportPacket.HEADER_LENGTH];
+		
+		System.arraycopy(bytes, 12, data, 0, data.length);
+		
+		TransportPacket transportPacket = new TransportPacket(sequenceNumber, acknowledgeNumber, flags, streamNumber, data);
+		transportPacket.setReserved(reserved);
+		
+		return transportPacket;
 	}
+	
 }
