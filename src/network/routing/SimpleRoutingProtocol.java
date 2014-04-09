@@ -29,7 +29,7 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 			if (networkPacket.getHopcount() == 0) {
 				networkInterface.process(networkPacket);
 			} else {
-				return;
+				networkInterface.send(networkPacket);
 			}
 		}
 	}
