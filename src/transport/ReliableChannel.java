@@ -12,9 +12,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import network.NetworkInterface;
+import network.NetworkListener;
 import network.NetworkPacket;
 
-public class ReliableChannel {
+public class ReliableChannel implements NetworkListener{
 	public static final int WNDSZ = 10;
 	private static final int MSS = 5;
 	private InetAddress localAddress;
@@ -53,15 +54,15 @@ public class ReliableChannel {
 	private class QueueSender extends Thread {
 		private ArrayList<TransportPacket> sendQueue;
 		private int currentStream;
-		private int seqNumber = 0;
+
 		private int sendIndex;
 		private ArrayList<Integer> expectedACK;
-		private ArrayList<NetworkPacket> currentWindow;
+		private ArrayList<TransportPacket> currentWindow;
 
 		public QueueSender(ArrayList<TransportPacket> queue) {
 			this.sendQueue = queue;
 			expectedACK = new ArrayList<Integer>();
-			currentWindow = new ArrayList<NetworkPacket>();
+			currentWindow = new ArrayList<TransportPacket>();
 		}
 		/**
 		 * Fill the sendWindow with n Packets to be send
@@ -74,8 +75,6 @@ public class ReliableChannel {
 				TransportPacket t = null;
 				// fill expectedACK with next seqs
 				t = sendQueue.get(index);
-				
-				t.setSequenceNumber(seqNumber);
 				// Check whether packet has same stream number
 				if (t.getStreamNumber() != this.currentStream) {
 					break;
@@ -84,18 +83,14 @@ public class ReliableChannel {
 //					sendQueue.poll();
 					println = true;
 					expectedACK.add(t.getAcknowledgeNumber());
-					
-					NetworkPacket networkPacket = new NetworkPacket(
-							localAddress, address, (byte) 2,
-							t.getBytes());
-					
-					currentWindow.add(networkPacket);
+					currentWindow.add(t);
 					// Reset sendIndex to 0 to start at the beginning of
 					// each window
 					sendIndex = 0;
 					
-					System.out.print(currentWindow.size() + ", ");
+					System.out.print(t.getSequenceNumber()+", ");
 				}
+				index++;
 			}
 			if(println){
 				System.out.println("");
@@ -114,7 +109,6 @@ public class ReliableChannel {
 					if (currentWindow.size() == 0
 							&& sendQueue.get(0).getStreamNumber() != this.currentStream) {
 						currentStream++;
-						seqNumber = 0;
 						System.out.println("                   NEW STREAM: "
 								+ currentStream);
 					}
@@ -132,10 +126,11 @@ public class ReliableChannel {
 							System.out.println("packet" + (sendIndex + 1)
 									+ " | " + currentWindow.size());
 
-							
+							NetworkPacket networkPacket = new NetworkPacket(
+									localAddress, address, (byte) 2,
+									currentWindow.get(sendIndex).getBytes());
 							try {
-								networkInterface.send(currentWindow
-										.get(sendIndex));
+								networkInterface.send(networkPacket);
 								sendIndex++;
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -194,7 +189,7 @@ public class ReliableChannel {
 
 		public void run() {
 			while (true) {
-
+//				if(in.)
 				try {
 					byte[] data = in.readLine().getBytes();
 					int dataPosition = 0;
@@ -216,7 +211,6 @@ public class ReliableChannel {
 						dataPosition += MSS;
 						seqNumber++;
 					}
-
 					if (dataPosition < data.length) {
 						byte[] packetData = new byte[data.length - dataPosition];
 
@@ -236,6 +230,7 @@ public class ReliableChannel {
 					seqNumber++;
 				} catch (IOException e) {
 				}
+//				
 				seqNumber = 0;
 				streamNumber++;
 			}
@@ -248,6 +243,12 @@ public class ReliableChannel {
 
 	public InputStream getInputStream() {
 		return in;
+	}
+
+	@Override
+	public void onReceive(NetworkPacket packet) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

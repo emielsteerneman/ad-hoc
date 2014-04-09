@@ -24,7 +24,6 @@ public class TransportPacket {
 	}
 	
 	public TransportPacket(int sequenceNumber, int acknowledgeNumber, byte flags, byte streamNumber, byte[] data) {
-		System.out.println("PACK: " +sequenceNumber+", "+acknowledgeNumber);
 		this.sequenceNumber = sequenceNumber;
 		this.acknowledgeNumber = acknowledgeNumber;
 		this.flags = flags;
