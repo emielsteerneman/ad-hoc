@@ -6,9 +6,14 @@ import network.NetworkInterface;
 import network.NetworkPacket;
 
 public class SimpleRoutingProtocol implements RoutingProtocol {
+	private NetworkInterface networkInterface;
+	
+	public SimpleRoutingProtocol(NetworkInterface networkInterface) {
+		this.networkInterface = networkInterface;
+	}
 	
 	@Override
-	public void rout(NetworkPacket networkPacket, NetworkInterface networkInterface) throws IOException {
+	public void rout(NetworkPacket networkPacket) throws IOException {
 		if (!networkPacket.getDestinationAddresses().contains(networkInterface.getLocalHost())) {
 			if (networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
 				return;

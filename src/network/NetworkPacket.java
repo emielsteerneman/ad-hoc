@@ -3,7 +3,9 @@ package network;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class NetworkPacket {
 	byte flags = 0;
@@ -115,15 +117,64 @@ public class NetworkPacket {
 		return bytes;
 	}
 	
-	public static NetworkPacket parseBytes(byte[] bytes) {
+	public static class ParseException extends ExecutionException {
+		private static final long serialVersionUID = 7294253795248977288L;
+
+		public ParseException() {
+			super();
+		}
+
+		public ParseException(String message) {
+			super(message);
+		}
 		
-		return null;
 	}
 	
-	public static void main(String[] args) throws UnknownHostException {
-		NetworkPacket packet = new NetworkPacket(InetAddress.getByAddress(new byte[4]), InetAddress.getByAddress(new byte[4]), (byte) 4, new byte[5]);
+	public static NetworkPacket parseBytes(byte[] bytes) throws ParseException {
+		NetworkPacket networkPacket = null;
 		
-		packet.getBytes();
+		if (bytes.length < 8) {
+			throw new NetworkPacket.ParseException("Not enough bytes");
+		}
+		
+		byte flags = bytes[0];
+		byte hopcount = bytes[1];
+		byte headerSize = bytes[2];
+		byte reserved = bytes[3];
+		
+		InetAddress sourceAddress = null;
+		
+		try {
+			sourceAddress = InetAddress.getByAddress(Arrays.copyOfRange(bytes, 0, 4));
+		} catch (UnknownHostException e) {
+			throw new NetworkPacket.ParseException(e.getMessage());
+		}
+		
+		List<InetAddress> destinationAddresses = new ArrayList<>();
+		
+		for (int i = 2; i < headerSize; i++) {
+			if ((i * 4) + 4 >= bytes.length) {
+				throw new NetworkPacket.ParseException("not enough bytes");
+			}
+			
+			InetAddress destinationAddress = null;
+			
+			try {
+				destinationAddress = InetAddress.getByAddress(Arrays.copyOfRange(bytes, i * 4, (i * 4) + 4));	
+			} catch (UnknownHostException e) {
+				throw new NetworkPacket.ParseException(e.getMessage());
+			}
+			
+			destinationAddresses.add(destinationAddress);
+		}
+		
+		byte[] data = Arrays.copyOfRange(bytes, headerSize, bytes.length);
+
+		networkPacket = new NetworkPacket(sourceAddress, destinationAddresses, hopcount, data);
+		networkPacket.setFlags(flags);
+		networkPacket.setReserved(reserved);
+		
+		return networkPacket;
 	}
 	
 }
