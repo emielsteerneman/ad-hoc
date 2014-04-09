@@ -1,6 +1,8 @@
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 
 import network.NetworkInterface;
@@ -9,27 +11,23 @@ import transport.ReliableChannel;
 
 public class Main {
 	public static void main(String[] args) throws IOException, InterruptedException {
-		NetworkInterface networkInterface = new NetworkInterface(InetAddress.getByName("226.2.2.2"), 4446);
-//		NetworkInterface receivernetworkInterface = new NetworkInterface(InetAddress.getByName("226.2.2.2"), 4446);
+		// 130.89.130.41
+		// 130.89.130.15
+		// 55555
+		NetworkInterface networkInterface = new NetworkInterface(InetAddress.getByName("130.89.130.41"), 55555);
 		
-		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.131.78"),InetAddress.getByName("190.89.131.74"), networkInterface);
-//		ReliableChannel receiver = new ReliableChannel(InetAddress.getByName("190.89.131.74"),InetAddress.getByName("130.89.131.78"),networkInterface);
+		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.131.78"), InetAddress.getByName("190.89.131.74"), networkInterface);
 		
 		networkInterface.addNetworkListener(channel);
 		
-//		networkInterface.addNetworkListener(receiver);
-		OutputStream out = channel.getOutputStream();
-		byte[] s = new byte[200];
-		byte[] d = new byte[200];
-		for(int i=0; i<200; i++){
-			s[i] = 1;
-			d[i] = 2;
-		}
-		d[199] = '\n';
-		s[199] = '\n';
-		out.write(d);
-		out.write(s);
+		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
 		
-		}
+		out.write("adsfadsfjasdfjaskldfjlkasdjflkasjdfasdfasdfasdfasdfjasdfkjaskdjf;klasdjfklsadjfklasjfdkajsdfkasdfjaksldjfkalsdjfka");
+		out.write("adsfadsfjasdfjaskldfjlkasdjflkasjdfasdfasdfasdfasdfjasdfkjaskdjf;klasdjfklsadjfklasjfdkajsdfkasdfjaksldjfkalsdjfka");
+		out.write("adsfadsfjasdfjaskldfjlkasdjflkasjdfasdfasdfasdfasdfjasdfkjaskdjf;klasdjfklsadjfklasjfdkajsdfkasdfjaksldjfkalsdjfka");
+		out.write("adsfadsfjasdfjaskldfjlkasdjflkasjdfasdfasdfasdfasdfjasdfkjaskdjf;klasdjfklsadjfklasjfdkajsdfkasdfjaksldjfkalsdjfka");
+		
+		out.newLine();
+	}
 	
 }
