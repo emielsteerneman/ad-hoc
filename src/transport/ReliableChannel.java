@@ -206,6 +206,7 @@ public class ReliableChannel implements NetworkListener{
 						//Set packet data
 						transportPacket.setStreamNumber(streamNumber);
 						transportPacket.setSequenceNumber(seqNumber);
+						transportPacket.setAcknowledgeNumber(seqNumber);
 						packetList.add(transportPacket);
 
 						dataPosition += MSS;
@@ -222,7 +223,7 @@ public class ReliableChannel implements NetworkListener{
 						//Set packet data
 						transportPacket.setStreamNumber(streamNumber);
 						transportPacket.setSequenceNumber(seqNumber);
-
+						transportPacket.setAcknowledgeNumber(seqNumber);
 						packetList.add(transportPacket);
 					 
 						
@@ -247,7 +248,11 @@ public class ReliableChannel implements NetworkListener{
 
 	@Override
 	public void onReceive(NetworkPacket packet) {
-		// TODO Auto-generated method stub
+		//Check whether incoming packet is for local ip
+		if(packet.getDestinationAddresses().equals(localAddress)){
+			
+		}
+		
 		
 	}
 
