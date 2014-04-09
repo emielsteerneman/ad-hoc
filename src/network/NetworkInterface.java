@@ -73,9 +73,10 @@ public class NetworkInterface extends Thread {
 	public void run() {
 		while (true) {
 			DatagramPacket packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
-			
+			System.out.println("Incoming packet");
 			try {
 				receiveSocket.receive(packet);
+				
 			} catch (IOException e) {
 				packet = null;
 			}
