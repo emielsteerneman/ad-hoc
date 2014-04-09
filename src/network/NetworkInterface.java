@@ -5,7 +5,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +13,7 @@ import network.routing.SimpleRoutingProtocol;
 
 public class NetworkInterface extends Thread {
 	private static final int BUFFER_SIZE = 512;
+	private static final int TIME_OUT = 2000;
 	
 	private int port;
 	private InetAddress group;
@@ -36,6 +36,7 @@ public class NetworkInterface extends Thread {
 		
 		this.receiveSocket = new MulticastSocket(port);
 		this.receiveSocket.joinGroup(group);
+		this.receiveSocket.setSoTimeout(TIME_OUT);
 		this.sendSocket = new DatagramSocket();
 		
 		this.networkListeners = new ArrayList<>();
@@ -51,11 +52,8 @@ public class NetworkInterface extends Thread {
 			
 			try {
 				receiveSocket.receive(packet);
-				receiveSocket.setSoTimeout(1000);
-			} catch (SocketException e) {
-				
 			} catch (IOException e) {
-				running = false;
+				packet = null;
 			}
 			
 			if (packet != null) {
@@ -106,6 +104,12 @@ public class NetworkInterface extends Thread {
 		if (networkPacket != null) {
 			routingProtocol.rout(networkPacket);
 		}
+	}
+	
+	public void shutDown() {
+		running = false;
+		
+		sendSocket.close();
 	}
 	
 }

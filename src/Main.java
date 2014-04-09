@@ -4,9 +4,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 
 import network.NetworkInterface;
-
-import network.routing.SimpleRoutingProtocol;
-
 import transport.ReliableChannel;
 
 
@@ -15,6 +12,8 @@ public class Main {
 		NetworkInterface networkInterface = new NetworkInterface(InetAddress.getByName("226.2.2.2"), 4446);
 		
 		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.131.78"),InetAddress.getByName("190.89.131.74"), networkInterface);
+		
+		networkInterface.addNetworkListener(channel);
 		
 		OutputStream out = channel.getOutputStream();
 		byte[] s = new byte[200];

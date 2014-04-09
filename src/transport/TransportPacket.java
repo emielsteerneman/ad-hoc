@@ -107,5 +107,8 @@ public class TransportPacket {
 		
 		return bytes;
 	}
-	
+
+	public static TransportPacket parseBytes(byte[] bytes) {
+		
+	}
 }
