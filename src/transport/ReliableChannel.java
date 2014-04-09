@@ -15,7 +15,7 @@ import network.NetworkInterface;
 import network.NetworkListener;
 import network.NetworkPacket;
 
-public class ReliableChannel implements NetworkListener{
+public class ReliableChannel implements NetworkListener {
 	public static final int WNDSZ = 10;
 	private static final int MSS = 5;
 	private InetAddress localAddress;
@@ -29,8 +29,8 @@ public class ReliableChannel implements NetworkListener{
 	private PipedInputStream pipedIn;
 	private InputHandler inputHandler;
 	private QueueSender queueSender;
-	//QUEUE for important packets 
-	private ArrayList<TransportPacket> packetList = new ArrayList<TransportPacket>(); 
+	// QUEUE for important packets
+	private ArrayList<TransportPacket> packetList = new ArrayList<TransportPacket>();
 	// private ArrayList<TranportPacket>
 
 	private byte streamNumber = 0;
@@ -48,10 +48,10 @@ public class ReliableChannel implements NetworkListener{
 		out = new PipedOutputStream(pipedIn);
 
 		inputHandler = new InputHandler(pipedIn);
-		Thread t = (Thread)inputHandler;
+		Thread t = (Thread) inputHandler;
 		t.start();
 		queueSender = new QueueSender(packetList);
-		Thread z = (Thread)queueSender;
+		Thread z = (Thread) queueSender;
 		z.start();
 	}
 
@@ -64,47 +64,54 @@ public class ReliableChannel implements NetworkListener{
 		private int sendIndex;
 		private ArrayList<Integer> expectedACK;
 		private ArrayList<TransportPacket> currentWindow;
-		public void priorityPacket(TransportPacket packet){
+
+		public void priorityPacket(TransportPacket packet) {
 			currentWindow.set(0, packet);
 		}
+
 		public QueueSender(ArrayList<TransportPacket> queue) {
 			this.sendQueue = queue;
 			expectedACK = new ArrayList<Integer>();
 			currentWindow = new ArrayList<TransportPacket>();
 		}
+
 		/**
 		 * Fill the sendWindow with n Packets to be send
 		 */
-		private void fillWindow(){
+		private void fillWindow() {
 			int index = 0;
-	
-			while (currentWindow.size() < WNDSZ && sendQueue.size() > 0) {
-				// System.out.print("filling window--");
-				TransportPacket t = null;
-				// fill expectedACK with next seqs
-				t = sendQueue.get(index);
-				// Check whether packet has same stream number
-				if (t.getStreamNumber() != this.currentStream) {
-					break;
-				} else {
-					// If not continue polling and adding expected ACK's
-//					sendQueue.poll();
-					expectedACK.add(t.getAcknowledgeNumber());
-					currentWindow.add(t);
-					// Reset sendIndex to 0 to start at the beginning of
-					// each window
-					sendIndex = 0;
-					
-	
+			if (currentWindow.size() == 0) {
+				while (currentWindow.size() < WNDSZ && sendQueue.size() > 0
+						&& index < sendQueue.size()) {
+					// System.out.print("filling window--");
+					TransportPacket t = null;
+					// fill expectedACK with next seqs
+					t = sendQueue.get(index);
+					// Check whether packet has same stream number
+					if (t.getStreamNumber() != this.currentStream) {
+						break;
+					} else {
+						// If not continue polling and adding expected ACK's
+						// sendQueue.poll();
+						expectedACK.add(t.getAcknowledgeNumber());
+						currentWindow.add(t);
+						// Reset sendIndex to 0 to start at the beginning of
+						// each window
+						sendIndex = 0;
+
+					}
+					index++;
 				}
-				index++;
 			}
 
 		}
+
 		@Override
-		// TODO: ACK, set ack/seq numbers of transportPackets, priority packets (replace first packet in send queue)
+		// TODO: ACK, set ack/seq numbers of transportPackets, priority packets
+		// (replace first packet in send queue)
 		public void run() {
 			while (true) {
+
 				// Try sending as long as there are packets left to send
 				if (sendQueue.size() > 0 || currentWindow.size() > 0) {
 
@@ -124,13 +131,15 @@ public class ReliableChannel implements NetworkListener{
 					// for in send queue
 					//
 
-//					System.out.println("");
+					// System.out.println("");
 					if (currentWindow.size() > 0) {
+						
 						if (sendIndex < currentWindow.size()) {
 
 							NetworkPacket networkPacket = new NetworkPacket(
 									localAddress, address, (byte) 2,
 									currentWindow.get(sendIndex).getBytes());
+							System.out.println("SEQ: "+currentWindow.get(sendIndex).getSequenceNumber());
 							try {
 								networkInterface.send(networkPacket);
 								sendIndex++;
@@ -148,17 +157,16 @@ public class ReliableChannel implements NetworkListener{
 							if (expectedACK.size() == 0) {
 								// IF list empty: all packets have been acked ->
 								// new Stream
-//								System.out.println("window empty. removing send packets from list");
-								for(int i=0; i<currentWindow.size();i++){
-									sendQueue.remove(0);
+								// System.out.println("window empty. removing send packets from list");
+								for (int i = 0; i < currentWindow.size(); i++) {
+									if (sendQueue.size() > 0) {
+										sendQueue.remove(0);
+									}
 								}
 								currentWindow.clear();
-								
-								//REMOVE PACKETS FROM LIST
 
-								
-								
-								
+								// REMOVE PACKETS FROM LIST
+
 								// currentStream++;
 							} else {
 								// Resent remaining packets
@@ -185,13 +193,14 @@ public class ReliableChannel implements NetworkListener{
 	private class InputHandler extends Thread {
 		BufferedReader in;
 		int seqNumber;
+
 		public InputHandler(InputStream in) {
 			this.in = new BufferedReader(new InputStreamReader(in));
 		}
 
 		public void run() {
 			while (true) {
-//				if(in.)
+				// if(in.)
 				try {
 					byte[] data = in.readLine().getBytes();
 					int dataPosition = 0;
@@ -205,7 +214,7 @@ public class ReliableChannel implements NetworkListener{
 
 						TransportPacket transportPacket = new TransportPacket(
 								packetData);
-						//Set packet data
+						// Set packet data
 						transportPacket.setStreamNumber(streamNumber);
 						transportPacket.setSequenceNumber(seqNumber);
 						transportPacket.setAcknowledgeNumber(seqNumber);
@@ -222,18 +231,17 @@ public class ReliableChannel implements NetworkListener{
 
 						TransportPacket transportPacket = new TransportPacket(
 								packetData);
-						//Set packet data
+						// Set packet data
 						transportPacket.setStreamNumber(streamNumber);
 						transportPacket.setSequenceNumber(seqNumber);
 						transportPacket.setAcknowledgeNumber(seqNumber);
 						packetList.add(transportPacket);
-					 
-						
+
 					}
 					seqNumber++;
 				} catch (IOException e) {
 				}
-//				
+				//
 				seqNumber = 0;
 				streamNumber++;
 			}
@@ -251,27 +259,29 @@ public class ReliableChannel implements NetworkListener{
 	@Override
 	public void onReceive(NetworkPacket packet) {
 		System.out.println("INCOMMING!");
-		//Check whether incoming packet is for local ip
-		if(packet.getDestinationAddresses().equals(localAddress)){
-			//Check whether packet is an ACK
-			TransportPacket received = TransportPacket.parseBytes(packet.getBytes());
-			if(received!=null){
-				if(received.getAcknowledgeNumber()!=-1){
-					//React to ACK
-				}else{
-					//IF ACK field == -1 -> data packet
-					//-> add to queue and send ack
-			
-					TransportPacket transportPacket = new TransportPacket(0, received.getAcknowledgeNumber(),(byte) 0, received.getStreamNumber(), null);
+		// Check whether incoming packet is for local ip
+		if (packet.getDestinationAddresses().equals(localAddress)) {
+			// Check whether packet is an ACK
+			TransportPacket received = TransportPacket.parseBytes(packet
+					.getBytes());
+			if (received != null) {
+				if (received.getAcknowledgeNumber() != -1) {
+					// React to ACK
+				} else {
+					// IF ACK field == -1 -> data packet
+					// -> add to queue and send ack
+
+					TransportPacket transportPacket = new TransportPacket(0,
+							received.getAcknowledgeNumber(), (byte) 0,
+							received.getStreamNumber(), null);
 					queueSender.priorityPacket(transportPacket);
-					
-					//Set packet data
-					
+
+					// Set packet data
+
 				}
 			}
 		}
-		
-		
+
 	}
 
 }
