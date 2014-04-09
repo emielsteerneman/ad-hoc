@@ -4,10 +4,9 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 
 import network.NetworkInterface;
-<<<<<<< HEAD
+
 import network.routing.SimpleRoutingProtocol;
-=======
->>>>>>> cd842ca42a86c709213dd3db6f0d91de4f0a915f
+
 import transport.ReliableChannel;
 
 
