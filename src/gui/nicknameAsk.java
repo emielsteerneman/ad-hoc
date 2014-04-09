@@ -30,7 +30,7 @@ public class nicknameAsk {
 	public nicknameAsk(){
 		Font font = new Font("Arial", Font.BOLD, 20);
 		
-		frame = new JFrame("Rolit");
+		frame = new JFrame("ChatApp");
 		frame.setPreferredSize(new Dimension(300, 300));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);

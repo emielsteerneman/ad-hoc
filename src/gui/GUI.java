@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -63,8 +64,12 @@ public class GUI extends JFrame{
 	private DiffieHellmanProtocol dhp;
 	private SocketHandler sh;
 	private ChatApp ca;
-	
+	private JComboBox<String> cb;
+	private String[] sa;
+	private String[] COLOR = {"Red", "Blue", "Yellow", "Green"};
 	private boolean connect = false;
+	private Color backgroundColor = new Color(176,224,230);
+	private JFrame frame;
 
 	public GUI(String username, SocketHandler sh, ChatApp ca) {
 		this.sh = sh;
@@ -79,7 +84,7 @@ public class GUI extends JFrame{
 		
 		GridBagConstraints c = new GridBagConstraints();
 		Font font = new Font("Arial", Font.BOLD, 20);
-		Color backgroundColor = new Color(176,224,230);
+	//	backgroundColor = new Color(176,224,230);
 		
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
@@ -139,8 +144,8 @@ public class GUI extends JFrame{
 		MatteBorder mborder = new MatteBorder(3,3,3,3,backgroundColor);
 	
 	
-	//username
-		lbl = new JLabel("ChatApp");
+	//title
+		lbl = new JLabel("Public Chat");
 		lbl.setFont(font);
 		menuPanel.add(lbl);
 		
@@ -256,6 +261,52 @@ public class GUI extends JFrame{
 			public void keyTyped(KeyEvent e){};
 			public void keyReleased(KeyEvent e){};
 		});
+		
+		
+		lbl = new JLabel("Private Chat");
+		lbl.setFont(font);
+		menuPanel.add(lbl);
+		
+		
+		//combobox
+		cb = new JComboBox<String>(ArrayListToStringArray(connectedPeople));
+		cb.setSelectedIndex(connectedPeople.size()-1);
+		menuPanel.add(cb);
+		
+		//start channel button
+		
+		btn = new JButton("Start Private Chat");
+		btn.setFont(font);
+		btn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				String chosenOne = (String) cb.getSelectedItem();
+				message("Starting new channel with: " + chosenOne);
+				startPrivateChat();
+				//start new channel with chosenOne
+			}
+		});
+		menuPanel.add(btn);
+		
+		//filler
+		lbl = new JLabel();
+		menuPanel.add(lbl);
+		
+		//Stylist
+		cb = new JComboBox<String>(COLOR);
+		cb.setSelectedIndex(COLOR.length-1);
+		menuPanel.add(cb);
+		
+		btn = new JButton("Confirm");
+		btn.setFont(font);
+		btn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				String chosenStyle = (String) cb.getSelectedItem();
+				message("Changing style to: " + chosenStyle);
+				updateColors(chosenStyle);
+				message("updated");
+			}
+		});
+		menuPanel.add(btn);		
 
 		//ADD ALL TO mainPanel
 		c.gridx = 1;
@@ -278,7 +329,7 @@ public class GUI extends JFrame{
 		c.weightx = 0;
 		mainPanel.add(menuPanel, c);
 
-		JFrame frame = new JFrame("GUI");
+		frame = new JFrame("GUI");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
 		frame.add(mainPanel);
@@ -331,6 +382,11 @@ public class GUI extends JFrame{
 		
 	}
 	
+	public void startPrivateChat(){
+			ca.startPrivateChat();
+			
+	}
+	
 	public void disconnect() throws IOException{
 		
 		ca.disconnect();
@@ -361,6 +417,14 @@ public class GUI extends JFrame{
 		return a;
 	}
 	
+	public String[] ArrayListToStringArray(ArrayList<String> al){
+		sa = new String[al.size()];
+		for(int i =0; i < al.size(); i++){
+			sa[i] = al.get(i);
+		}
+		return sa;
+	}
+	
 	public void checkConnections(){
 		connectedPeople.add("gevonden connectie");
 	}
@@ -369,6 +433,25 @@ public class GUI extends JFrame{
 		return username;
 	}
 	
+	public void updateColors(String chosenColor){
+		message("called");
+		if(chosenColor == "Red"){
+			backgroundColor = Color.RED;
+			message("red");
+		} else if(chosenColor == "Blue"){
+			backgroundColor = Color.BLUE;
+			message("blu");
+		} else if(chosenColor == "Yellow"){
+			backgroundColor = Color.YELLOW;
+			message("ylw");
+		} else if(chosenColor == "Green"){
+			backgroundColor = Color.GREEN;
+			message("grn");
+		}
+		frame.repaint();
+		frame.revalidate();
+		
+	}
 	public static void main(String[] args){
 			
 	}

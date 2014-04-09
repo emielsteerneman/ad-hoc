@@ -19,7 +19,6 @@ public class ChatApp {
 		gui = new GUI(username, sh, this);
 		sh = new SocketHandler(gui, this);
 	}
-
 	public void connect() throws IOException{
 		
 		gui.message("Connecting to socket...");
@@ -30,7 +29,6 @@ public class ChatApp {
 		
 		connect = true;
 	}
-	
 	public void disconnect() throws IOException{
 		if(connect == true){
 		gui.message("Disconnecting from channel...\n");
@@ -42,6 +40,15 @@ public class ChatApp {
 		} else {
 			gui.message("You are not connected to this channel");
 		}
+		
+	
+		
+	}
+	public void startPrivateChat(){
+		gui.message("Starting private chat");
+		//new Channel(name,InetAddress)
+		
+		
 	}
 	
 }
