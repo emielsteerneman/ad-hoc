@@ -45,6 +45,10 @@ public class TransportPacket {
 		return flags;
 	}
 	
+	public boolean isFlagSet(byte flag) {
+		return (flags & flag) == flag;
+	}
+	
 	public byte getStreamNumber() {
 		return streamNumber;
 	}
