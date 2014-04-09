@@ -260,20 +260,22 @@ public class ReliableChannel implements NetworkListener {
 	public void onReceive(NetworkPacket packet) {
 		System.out.println("INCOMMING!");
 		// Check whether incoming packet is for local ip
-		if (packet.getDestinationAddresses().equals(localAddress)) {
+		if (packet.getSourceAddress().equals(address)) {
 			// Check whether packet is an ACK
 			TransportPacket received = TransportPacket.parseBytes(packet
 					.getBytes());
 			if (received != null) {
-				if (received.getAcknowledgeNumber() != -1) {
+				if (received.getFlags() == TransportPacket.ACK_FLAG) {
+					System.out.println("GOT ACK " +received.getAcknowledgeNumber());
 					// React to ACK
 				} else {
 					// IF ACK field == -1 -> data packet
 					// -> add to queue and send ack
 
 					TransportPacket transportPacket = new TransportPacket(0,
-							received.getAcknowledgeNumber(), (byte) 0,
+							received.getAcknowledgeNumber(), TransportPacket.ACK_FLAG,
 							received.getStreamNumber(), null);
+					System.out.println("SENDING ACK: "+received.getAcknowledgeNumber());
 					queueSender.priorityPacket(transportPacket);
 
 					// Set packet data
