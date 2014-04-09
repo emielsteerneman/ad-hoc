@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -22,7 +22,8 @@ public class NetworkInterface extends Thread {
 	
 	private InetAddress localHost;
 	
-	private MulticastSocket receiveSocket;
+	//private MulticastSocket receiveSocket;
+	private DatagramSocket receiveSocket;
 	private DatagramSocket sendSocket;	
 	
 	private List<NetworkListener> networkListeners;
@@ -36,8 +37,9 @@ public class NetworkInterface extends Thread {
 		
 		this.localHost = InetAddress.getLocalHost();
 		
-		this.receiveSocket = new MulticastSocket(port);
-		this.receiveSocket.joinGroup(group);
+		//this.receiveSocket = new MulticastSocket(port);
+		//this.receiveSocket.joinGroup(group);
+		this.receiveSocket = new DatagramSocket(port);
 		this.receiveSocket.setSoTimeout(TIME_OUT);
 		this.sendSocket = new DatagramSocket();
 		
@@ -52,9 +54,11 @@ public class NetworkInterface extends Thread {
 			public void run() {
 				while (true) {
 					while (localQueue.isEmpty()) {
-						try {
-							localQueue.wait();
-						} catch (InterruptedException e) { }
+						synchronized (localQueue) {
+							try {
+								localQueue.wait();
+							} catch (InterruptedException e) { }	
+						}
 					}
 					
 					try {
@@ -77,8 +81,10 @@ public class NetworkInterface extends Thread {
 			}
 			
 			if (packet != null) {
-				localQueue.add(packet);
-				localQueue.notify();
+				synchronized (localQueue) {
+					localQueue.add(packet);
+					localQueue.notify();
+				}
 			}
 		}
 	}
@@ -119,4 +125,10 @@ public class NetworkInterface extends Thread {
 		}
 	}
 	
+	public static void main(String[] args) throws UnknownHostException, IOException {
+		NetworkInterface iface = new NetworkInterface(InetAddress.getByName("130.89.130.41"), 44446);
+		iface.start();
+		
+		iface.send(new NetworkPacket(InetAddress.getByAddress(new byte[4]), InetAddress.getByAddress(new byte[4]), (byte) 2, "test".getBytes()));
+	}
 }
