@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class NetworkPacket {
 	byte flags = 0;
@@ -117,24 +116,11 @@ public class NetworkPacket {
 		return bytes;
 	}
 	
-	public static class ParseException extends ExecutionException {
-		private static final long serialVersionUID = 7294253795248977288L;
-
-		public ParseException() {
-			super();
-		}
-
-		public ParseException(String message) {
-			super(message);
-		}
-		
-	}
-	
-	public static NetworkPacket parseBytes(byte[] bytes) throws ParseException {
+	public static NetworkPacket parseBytes(byte[] bytes) {
 		NetworkPacket networkPacket = null;
 		
 		if (bytes.length < 8) {
-			throw new NetworkPacket.ParseException("Not enough bytes");
+			return null;
 		}
 		
 		byte flags = bytes[0];
@@ -147,14 +133,14 @@ public class NetworkPacket {
 		try {
 			sourceAddress = InetAddress.getByAddress(Arrays.copyOfRange(bytes, 0, 4));
 		} catch (UnknownHostException e) {
-			throw new NetworkPacket.ParseException(e.getMessage());
+			return null;
 		}
 		
 		List<InetAddress> destinationAddresses = new ArrayList<>();
 		
 		for (int i = 2; i < headerSize; i++) {
 			if ((i * 4) + 4 >= bytes.length) {
-				throw new NetworkPacket.ParseException("not enough bytes");
+				return null;
 			}
 			
 			InetAddress destinationAddress = null;
@@ -162,7 +148,7 @@ public class NetworkPacket {
 			try {
 				destinationAddress = InetAddress.getByAddress(Arrays.copyOfRange(bytes, i * 4, (i * 4) + 4));	
 			} catch (UnknownHostException e) {
-				throw new NetworkPacket.ParseException(e.getMessage());
+				return null;
 			}
 			
 			destinationAddresses.add(destinationAddress);

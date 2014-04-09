@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import network.routing.RoutingProtocol;
 import network.routing.SimpleRoutingProtocol;
@@ -26,7 +28,7 @@ public class NetworkInterface extends Thread {
 	private List<NetworkListener> networkListeners;
 	private RoutingProtocol routingProtocol;
 	
-	private boolean running = false;
+	private Queue<DatagramPacket> localQueue;
 	
 	public NetworkInterface(InetAddress group, int port) throws IOException {
 		this.group = group;
@@ -41,13 +43,31 @@ public class NetworkInterface extends Thread {
 		
 		this.networkListeners = new ArrayList<>();
 		this.routingProtocol = new SimpleRoutingProtocol(this);
+		
+		this.localQueue = new ArrayBlockingQueue<>(10);
+		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (true) {
+					while (localQueue.isEmpty()) {
+						try {
+							localQueue.wait();
+						} catch (InterruptedException e) { }
+					}
+					
+					try {
+						receive(localQueue.poll());
+					} catch (IOException e) { }
+				}
+			}
+		}).start();
 	}
 	
 	@Override
 	public void run() {
-		running = true;
-		
-		while (running) {
+		while (true) {
 			DatagramPacket packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
 			
 			try {
@@ -57,13 +77,10 @@ public class NetworkInterface extends Thread {
 			}
 			
 			if (packet != null) {
-				try {
-					receive(packet);
-				} catch (IOException e){ }
+				localQueue.add(packet);
+				localQueue.notify();
 			}
 		}
-		
-		receiveSocket.close();
 	}
 	
 	public InetAddress getLocalHost() {
@@ -78,7 +95,7 @@ public class NetworkInterface extends Thread {
 		this.networkListeners.remove(networkListener);
 	}
 	
-	public void process(NetworkPacket networkPacket) {
+	public synchronized void process(NetworkPacket networkPacket) {
 		for (NetworkListener networkListener : networkListeners) {
 			if (networkListener != null) {
 				networkListener.onReceive(networkPacket);
@@ -86,7 +103,7 @@ public class NetworkInterface extends Thread {
 		}
 	}
 	
-	public void send(NetworkPacket networkPacket) throws IOException {
+	public synchronized void send(NetworkPacket networkPacket) throws IOException {
 		byte[] packetData = networkPacket.getBytes();
 
 		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, port);
@@ -94,22 +111,12 @@ public class NetworkInterface extends Thread {
 		sendSocket.send(packet);
 	}
 	
-	private void receive(DatagramPacket packet) throws IOException {
-		NetworkPacket networkPacket = null;
-		
-		try {
-			networkPacket = NetworkPacket.parseBytes(packet.getData());
-		} catch (NetworkPacket.ParseException e) { }
+	private synchronized void receive(DatagramPacket packet) throws IOException {
+		NetworkPacket networkPacket = NetworkPacket.parseBytes(packet.getData());
 		
 		if (networkPacket != null) {
 			routingProtocol.rout(networkPacket);
 		}
-	}
-	
-	public void shutDown() {
-		running = false;
-		
-		sendSocket.close();
 	}
 	
 }
