@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import network.routing.RoutingProtocol;
 import network.routing.SimpleRoutingProtocol;
@@ -45,7 +46,7 @@ public class NetworkInterface extends Thread {
 		this.networkListeners = new ArrayList<>();
 		this.routingProtocol = new SimpleRoutingProtocol(this);
 		
-		this.localQueue = new ArrayBlockingQueue<>(10);
+		this.localQueue = new LinkedBlockingQueue<>();
 		
 		new Thread(new Runnable() {
 			
