@@ -10,8 +10,6 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import network.NetworkInterface;
 import network.NetworkPacket;
@@ -55,6 +53,7 @@ public class ReliableChannel {
 	private class QueueSender extends Thread {
 		private ArrayList<TransportPacket> sendQueue;
 		private int currentStream;
+		private int seqNumber = 0;
 		private int sendIndex;
 		private ArrayList<Integer> expectedACK;
 		private ArrayList<NetworkPacket> currentWindow;
@@ -69,18 +68,21 @@ public class ReliableChannel {
 		 */
 		private void fillWindow(){
 			int index = 0;
+			boolean println = false;
 			while (currentWindow.size() < WNDSZ && sendQueue.size() > 0) {
 				// System.out.print("filling window--");
 				TransportPacket t = null;
 				// fill expectedACK with next seqs
 				t = sendQueue.get(index);
+				
+				t.setSequenceNumber(seqNumber);
 				// Check whether packet has same stream number
 				if (t.getStreamNumber() != this.currentStream) {
 					break;
 				} else {
 					// If not continue polling and adding expected ACK's
 //					sendQueue.poll();
-					
+					println = true;
 					expectedACK.add(t.getAcknowledgeNumber());
 					
 					NetworkPacket networkPacket = new NetworkPacket(
@@ -94,6 +96,9 @@ public class ReliableChannel {
 					
 					System.out.print(currentWindow.size() + ", ");
 				}
+			}
+			if(println){
+				System.out.println("");
 			}
 		}
 		@Override
@@ -109,6 +114,7 @@ public class ReliableChannel {
 					if (currentWindow.size() == 0
 							&& sendQueue.get(0).getStreamNumber() != this.currentStream) {
 						currentStream++;
+						seqNumber = 0;
 						System.out.println("                   NEW STREAM: "
 								+ currentStream);
 					}
@@ -119,12 +125,14 @@ public class ReliableChannel {
 					// for in send queue
 					//
 
-					System.out.println("");
+//					System.out.println("");
 					if (currentWindow.size() > 0) {
 						if (sendIndex < currentWindow.size()) {
 
 							System.out.println("packet" + (sendIndex + 1)
 									+ " | " + currentWindow.size());
+
+							
 							try {
 								networkInterface.send(currentWindow
 										.get(sendIndex));
@@ -179,7 +187,7 @@ public class ReliableChannel {
 
 	private class InputHandler extends Thread {
 		BufferedReader in;
-
+		int seqNumber;
 		public InputHandler(InputStream in) {
 			this.in = new BufferedReader(new InputStreamReader(in));
 		}
@@ -200,11 +208,13 @@ public class ReliableChannel {
 
 						TransportPacket transportPacket = new TransportPacket(
 								packetData);
+						//Set packet data
 						transportPacket.setStreamNumber(streamNumber);
-
+						transportPacket.setSequenceNumber(seqNumber);
 						packetList.add(transportPacket);
 
 						dataPosition += MSS;
+						seqNumber++;
 					}
 
 					if (dataPosition < data.length) {
@@ -215,13 +225,18 @@ public class ReliableChannel {
 
 						TransportPacket transportPacket = new TransportPacket(
 								packetData);
+						//Set packet data
 						transportPacket.setStreamNumber(streamNumber);
+						transportPacket.setSequenceNumber(seqNumber);
 
 						packetList.add(transportPacket);
+					 
+						
 					}
+					seqNumber++;
 				} catch (IOException e) {
 				}
-
+				seqNumber = 0;
 				streamNumber++;
 			}
 		}

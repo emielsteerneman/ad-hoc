@@ -79,7 +79,7 @@ public class NetworkInterface extends Thread {
 	
 	public void send(NetworkPacket networkPacket) throws IOException {
 		byte[] packetData = networkPacket.getBytes();
-		
+
 		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, PORT);
 		
 		sendSocket.send(packet);
