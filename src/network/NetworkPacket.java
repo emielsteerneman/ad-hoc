@@ -131,7 +131,7 @@ public class NetworkPacket {
 		InetAddress sourceAddress = null;
 		
 		try {
-			sourceAddress = InetAddress.getByAddress(Arrays.copyOfRange(bytes, 0, 4));
+			sourceAddress = InetAddress.getByAddress(Arrays.copyOfRange(bytes, 4, 8));
 		} catch (UnknownHostException e) {
 			return null;
 		}
