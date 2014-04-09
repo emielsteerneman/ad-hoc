@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import network.routing.RoutingProtocol;
@@ -73,10 +72,9 @@ public class NetworkInterface extends Thread {
 	public void run() {
 		while (true) {
 			DatagramPacket packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
-			System.out.println("Incoming packet");
+			
 			try {
 				receiveSocket.receive(packet);
-				
 			} catch (IOException e) {
 				packet = null;
 			}
