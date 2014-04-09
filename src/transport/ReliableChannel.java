@@ -66,7 +66,11 @@ public class ReliableChannel implements NetworkListener {
 		private ArrayList<TransportPacket> currentWindow;
 
 		public void priorityPacket(TransportPacket packet) {
-			currentWindow.set(0, packet);
+			if(currentWindow.size()>0){
+				currentWindow.set(0, packet);
+			}else{
+				currentWindow.add(packet);
+			}
 		}
 
 		public QueueSender(ArrayList<TransportPacket> queue) {
@@ -133,13 +137,15 @@ public class ReliableChannel implements NetworkListener {
 
 					// System.out.println("");
 					if (currentWindow.size() > 0) {
-						
+
 						if (sendIndex < currentWindow.size()) {
 
 							NetworkPacket networkPacket = new NetworkPacket(
 									localAddress, address, (byte) 2,
 									currentWindow.get(sendIndex).getBytes());
-							System.out.println("SEQ: "+currentWindow.get(sendIndex).getSequenceNumber());
+							System.out.println("SEQ: "
+									+ currentWindow.get(sendIndex)
+											.getSequenceNumber());
 							try {
 								networkInterface.send(networkPacket);
 								sendIndex++;
@@ -260,7 +266,8 @@ public class ReliableChannel implements NetworkListener {
 	public void onReceive(NetworkPacket packet) {
 		System.out.println("INCOMMING!");
 		// Check whether incoming packet is for local ip
-		System.out.println(address.toString()+" - "+packet.getSourceAddress().toString());
+		System.out.println(address.toString() + " - "
+				+ packet.getSourceAddress().toString());
 		if (packet.getSourceAddress().equals(address)) {
 			System.out.println("HERE");
 			// Check whether packet is an ACK
@@ -268,16 +275,19 @@ public class ReliableChannel implements NetworkListener {
 					.getBytes());
 			if (received != null) {
 				if (received.getFlags() == TransportPacket.ACK_FLAG) {
-					System.out.println("GOT ACK " +received.getAcknowledgeNumber());
+					System.out.println("GOT ACK "
+							+ received.getAcknowledgeNumber());
 					// React to ACK
 				} else {
 					// IF ACK field == -1 -> data packet
 					// -> add to queue and send ack
 
 					TransportPacket transportPacket = new TransportPacket(0,
-							received.getAcknowledgeNumber(), TransportPacket.ACK_FLAG,
+							received.getAcknowledgeNumber(),
+							TransportPacket.ACK_FLAG,
 							received.getStreamNumber(), null);
-					System.out.println("SENDING ACK: "+received.getAcknowledgeNumber());
+					System.out.println("SENDING ACK: "
+							+ received.getAcknowledgeNumber());
 					queueSender.priorityPacket(transportPacket);
 
 					// Set packet data
