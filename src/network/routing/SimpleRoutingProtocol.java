@@ -26,7 +26,7 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 				return;
 			}
 		} else {
-			if (networkPacket.getHopcount() == 0) {
+			if (networkPacket.getHopcount() >= 0) {
 				networkInterface.process(networkPacket);
 			} else {
 				networkInterface.send(networkPacket);

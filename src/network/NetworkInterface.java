@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import network.routing.RoutingProtocol;
 import network.routing.SimpleRoutingProtocol;
@@ -45,7 +45,7 @@ public class NetworkInterface extends Thread {
 		this.networkListeners = new ArrayList<>();
 		this.routingProtocol = new SimpleRoutingProtocol(this);
 		
-		this.localQueue = new LinkedBlockingQueue<>();
+		this.localQueue = new ArrayBlockingQueue<>(10);
 		
 		new Thread(new Runnable() {
 			
@@ -72,9 +72,10 @@ public class NetworkInterface extends Thread {
 	public void run() {
 		while (true) {
 			DatagramPacket packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
-			
+
 			try {
 				receiveSocket.receive(packet);
+				
 			} catch (IOException e) {
 				packet = null;
 			}
