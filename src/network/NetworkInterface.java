@@ -7,8 +7,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.List;
 
-import routing.RoutingProtocol;
-import routing.SimpleRoutingProtocol;
+import network.routing.RoutingProtocol;
+import network.routing.SimpleRoutingProtocol;
 
 public class NetworkInterface extends Thread {
 	private static final int PORT = 4446;

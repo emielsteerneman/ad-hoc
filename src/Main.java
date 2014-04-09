@@ -4,7 +4,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 
 import network.NetworkInterface;
-import routing.SimpleRoutingProtocol;
+import network.routing.SimpleRoutingProtocol;
 import transport.ReliableChannel;
 
 
