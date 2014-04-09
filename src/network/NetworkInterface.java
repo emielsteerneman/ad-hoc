@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import network.routing.RoutingProtocol;
@@ -31,6 +30,25 @@ public class NetworkInterface extends Thread {
 	
 	private Queue<DatagramPacket> localQueue;
 	
+	private class QueueProcessor implements Runnable {
+		@Override
+		public void run() {
+			while (true) {
+				while (localQueue.isEmpty()) {
+					synchronized (localQueue) {
+						try {
+							localQueue.wait();
+						} catch (InterruptedException e) { }	
+					}
+				}
+				
+				try {
+					receive(localQueue.poll());
+				} catch (IOException e) { }
+			}
+		}
+	}
+	
 	public NetworkInterface(InetAddress group, int port) throws IOException {
 		this.group = group;
 		this.port = port;
@@ -48,25 +66,7 @@ public class NetworkInterface extends Thread {
 		
 		this.localQueue = new LinkedBlockingQueue<>();
 		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				while (true) {
-					while (localQueue.isEmpty()) {
-						synchronized (localQueue) {
-							try {
-								localQueue.wait();
-							} catch (InterruptedException e) { }	
-						}
-					}
-					
-					try {
-						receive(localQueue.poll());
-					} catch (IOException e) { }
-				}
-			}
-		}).start();
+		new Thread(new QueueProcessor()).start();
 	}
 	
 	@Override
