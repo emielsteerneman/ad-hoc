@@ -5,46 +5,55 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.List;
 
-import routing.RoutingProtocol;
-import routing.SimpleRoutingProtocol;
+import network.routing.RoutingProtocol;
+import network.routing.SimpleRoutingProtocol;
 
 public class NetworkInterface extends Thread {
-	private static final int PORT = 4446;
-	private static final String GROUP = "226.2.2.2";
+	private static final int BUFFER_SIZE = 512;
 	
-	private MulticastSocket receiveSocket = null;
-	private DatagramSocket sendSocket = null;
-	private InetAddress localHost = null;
-	private InetAddress group = null;
+	private int port;
+	private InetAddress group;
 	
-	private static final int BUFFER_SIZE = 256;
+	private InetAddress localHost;
 	
-	private List<NetworkListener> networkListeners = null;
-	private RoutingProtocol routingProtocol = null;
+	private MulticastSocket receiveSocket;
+	private DatagramSocket sendSocket;	
 	
-	public NetworkInterface() throws IOException {
-		receiveSocket = new MulticastSocket(PORT);
+	private List<NetworkListener> networkListeners;
+	private RoutingProtocol routingProtocol;
+	
+	private boolean running = false;
+	
+	public NetworkInterface(InetAddress group, int port) throws IOException {
+		this.group = group;
+		this.port = port;
 		
-		localHost = InetAddress.getLocalHost();
-		group = InetAddress.getByName(GROUP);
+		this.localHost = InetAddress.getLocalHost();
 		
-		receiveSocket.joinGroup(group);
-		sendSocket = new DatagramSocket();
+		this.receiveSocket = new MulticastSocket(port);
+		this.receiveSocket.joinGroup(group);
+		this.sendSocket = new DatagramSocket();
 		
-		routingProtocol = new SimpleRoutingProtocol();
+		this.networkListeners = new ArrayList<>();
+		this.routingProtocol = new SimpleRoutingProtocol(this);
 	}
 	
 	@Override
 	public void run() {
-		boolean running = true;
+		running = true;
 		
 		while (running) {
 			DatagramPacket packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
 			
 			try {
 				receiveSocket.receive(packet);
+				receiveSocket.setSoTimeout(1000);
+			} catch (SocketException e) {
+				
 			} catch (IOException e) {
 				running = false;
 			}
@@ -82,7 +91,7 @@ public class NetworkInterface extends Thread {
 	public void send(NetworkPacket networkPacket) throws IOException {
 		byte[] packetData = networkPacket.getBytes();
 
-		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, PORT);
+		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, port);
 		
 		sendSocket.send(packet);
 	}
