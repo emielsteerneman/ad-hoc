@@ -126,9 +126,10 @@ public class NetworkInterface extends Thread {
 	}
 	
 	public static void main(String[] args) throws UnknownHostException, IOException {
-		NetworkInterface iface = new NetworkInterface(InetAddress.getByName("130.89.130.41"), 4446);
+		//130.89.130.41
+		NetworkInterface iface = new NetworkInterface(InetAddress.getByName("130.89.130.15"), 55555);
 		iface.start();
 		
-		iface.send(new NetworkPacket(InetAddress.getByAddress(new byte[4]), InetAddress.getByAddress(new byte[4]), (byte) 2, "test".getBytes()));
+		iface.send(new NetworkPacket(InetAddress.getByAddress(new byte[4]), InetAddress.getByAddress(new byte[4]), (byte) 2, "tesasdt".getBytes()));
 	}
 }
