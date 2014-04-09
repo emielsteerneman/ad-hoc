@@ -15,6 +15,7 @@ public class NetworkPacket {
 	private byte[] data;
 	
 	public NetworkPacket(InetAddress sourceAddress, InetAddress destinationAddress, byte hopcount, byte[] data) {
+		
 		this.sourceAddress = sourceAddress;
 		this.destinationAddresses = new ArrayList<>();
 		this.destinationAddresses.add(destinationAddress);
@@ -92,6 +93,7 @@ public class NetworkPacket {
 	public void setData(byte[] data) {
 		this.data = data;
 	}
+	//Fixed: filling bytes without errors, getHeaderLength()
 	
 	public byte[] getBytes() {
 		byte[] bytes = new byte[getHeaderLength() + data.length];
@@ -100,17 +102,29 @@ public class NetworkPacket {
 		bytes[1] = hopcount;
 		bytes[2] = getHeaderSize();
 		bytes[3] = reserved;
-		
-		System.arraycopy(sourceAddress, 0, bytes, 4, 8);
-		
+//		for(int i=0; i<8;i++)
+//		System.arraycopy(src, srcPos, dest, destPos, length)
+		System.arraycopy(sourceAddress.toString().getBytes(), 0, bytes, 4, 8);
+	
 		for (int i = 0; i < destinationAddresses.size(); i++) {
 			byte[] destinationAddress = destinationAddresses.get(i).getAddress();
-			
-			System.arraycopy(destinationAddress, 0, bytes, (i + 2) * 4, ((i + 2) * 4) + 4);
+//			System.out.print("POS: ");
+			for(int a=0; a<destinationAddress.length;a++){
+				int pos = 8+a+a*i;
+//				System.out.print(pos+", ");
+				bytes[pos] = destinationAddress[a];
+			}
+//			System.out.println();
+//			System.out.println(bytes.length+", "+destinationAddress.length+":: POS:"+(-1+(i+2)*4)+"... Len: "+(-1+((i+2)*4)+4));
+//			System.arraycopy(destinationAddress, 0, bytes, -1+(i + 2) * 4, -1+((i + 2) * 4) + 4);
 		}
-		
+
 		System.arraycopy(data, 0, bytes, getHeaderLength(), data.length);
-		
+		for(int i=0; i<bytes.length; i++){
+//			System.out.print(bytes[i]+" ");
+		}		
+//		System.out.println("");
+
 		return bytes;
 	}
 	

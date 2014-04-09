@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import network.routing.RoutingProtocol;
+import routing.RoutingProtocol;
 
 public class NetworkInterface extends Thread {
 	private static final int PORT = 4446;
