@@ -71,6 +71,7 @@ public class ReliableChannel implements NetworkListener {
 			}else{
 				currentWindow.add(packet);
 			}
+			System.out.println("NEW PRIORITY "+currentWindow.size());
 		}
 
 		public QueueSender(ArrayList<TransportPacket> queue) {
@@ -285,10 +286,11 @@ public class ReliableChannel implements NetworkListener {
 					TransportPacket transportPacket = new TransportPacket(0,
 							received.getAcknowledgeNumber(),
 							TransportPacket.ACK_FLAG,
-							received.getStreamNumber(), null);
+							received.getStreamNumber(), new byte[0]);
 					System.out.println("SENDING ACK: "
 							+ received.getAcknowledgeNumber());
-					queueSender.priorityPacket(transportPacket);
+//					queueSender.priorityPacket(transportPacket);
+					packetList.add(transportPacket);
 
 					// Set packet data
 
