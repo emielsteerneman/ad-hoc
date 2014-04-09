@@ -250,7 +250,8 @@ public class ReliableChannel implements NetworkListener{
 	public void onReceive(NetworkPacket packet) {
 		//Check whether incoming packet is for local ip
 		if(packet.getDestinationAddresses().equals(localAddress)){
-			
+			//Check whether packet is an ACK
+			if(packet.get)
 		}
 		
 		
