@@ -2,11 +2,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 
-import transport.ReliableChannel;
 import network.NetworkInterface;
-import network.NetworkListener;
-import network.NetworkPacket;
 import network.routing.SimpleRoutingProtocol;
+import transport.ReliableChannel;
 
 
 public class Main {
@@ -18,7 +16,7 @@ public class Main {
 		
 		OutputStream out = channel.getOutputStream();
 		
-		out.write("hallo\n".getBytes());
+		out.write("	 hallo\n".getBytes());
 	}
 	
 }

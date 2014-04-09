@@ -1,6 +1,7 @@
 package network;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,17 +102,28 @@ public class NetworkPacket {
 		bytes[2] = getHeaderSize();
 		bytes[3] = reserved;
 		
-		System.arraycopy(sourceAddress, 0, bytes, 4, 8);
+		System.arraycopy(sourceAddress.getAddress(), 0, bytes, 4, 4);
 		
 		for (int i = 0; i < destinationAddresses.size(); i++) {
 			byte[] destinationAddress = destinationAddresses.get(i).getAddress();
 			
-			System.arraycopy(destinationAddress, 0, bytes, (i + 2) * 4, ((i + 2) * 4) + 4);
+			System.arraycopy(destinationAddress, 0, bytes, (i + 2) * 4, 4);
 		}
 		
 		System.arraycopy(data, 0, bytes, getHeaderLength(), data.length);
 		
 		return bytes;
+	}
+	
+	public static NetworkPacket parseBytes(byte[] bytes) {
+		
+		
+	}
+	
+	public static void main(String[] args) throws UnknownHostException {
+		NetworkPacket packet = new NetworkPacket(InetAddress.getByAddress(new byte[4]), InetAddress.getByAddress(new byte[4]), (byte) 4, new byte[5]);
+		
+		packet.getBytes();
 	}
 	
 }
