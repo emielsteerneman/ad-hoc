@@ -77,6 +77,8 @@ public class NetworkDiscovery implements NetworkListener {
 			InetAddress device = packet.getSourceAddress();
 			String identifier = new String(packet.getData());
 			
+			System.out.println(device);
+			
 			devices.put(device, identifier);
 			timeouts.put(device, NetworkDiscovery.TIMEOUT);
 			

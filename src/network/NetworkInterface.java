@@ -61,7 +61,7 @@ public class NetworkInterface extends Thread {
 		this.receiveSocket.setSoTimeout(TIME_OUT);
 		this.sendSocket = new DatagramSocket();
 		
-		this.localHost = receiveSocket.getLocalAddress();
+		this.localHost = InetAddress.getLocalHost();
 		
 		this.networkListeners = new ArrayList<>();
 		this.routingProtocol = new SimpleRoutingProtocol(this);
