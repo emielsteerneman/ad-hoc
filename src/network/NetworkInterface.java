@@ -30,7 +30,7 @@ public class NetworkInterface extends Thread {
 	private List<NetworkListener> networkListeners;
 	private RoutingProtocol routingProtocol;
 	
-	private Queue<DatagramPacket> localQueue;
+	private Queue<NetworkPacket> localQueue;
 	
 	private class QueueProcessor implements Runnable {
 		@Override
@@ -45,7 +45,7 @@ public class NetworkInterface extends Thread {
 				}
 				
 				try {
-					receive(localQueue.poll());
+					routingProtocol.rout(localQueue.poll());
 				} catch (IOException e) { }
 			}
 		}
@@ -84,9 +84,13 @@ public class NetworkInterface extends Thread {
 			}
 			
 			if (packet != null) {
-				synchronized (localQueue) {
-					localQueue.add(packet);
-					localQueue.notify();
+				NetworkPacket networkPacket = NetworkPacket.parseBytes(packet.getData());
+				
+				if (networkPacket != null) {
+					synchronized (localQueue) {
+						localQueue.add(networkPacket);
+						localQueue.notify();
+					}	
 				}
 			}
 		}
@@ -118,14 +122,6 @@ public class NetworkInterface extends Thread {
 		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, port);
 		
 		sendSocket.send(packet);
-	}
-	
-	private synchronized void receive(DatagramPacket packet) throws IOException {
-		NetworkPacket networkPacket = NetworkPacket.parseBytes(packet.getData());
-		
-		if (networkPacket != null) {
-			routingProtocol.rout(networkPacket);
-		}
 	}
 	
 }
