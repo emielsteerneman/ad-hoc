@@ -129,7 +129,7 @@ public class ReliableChannel implements NetworkListener {
 		// TODO: ACK, set ack/seq numbers of transportPackets, priority packets
 		// (replace first packet in send queue)
 		public synchronized void run() {
-			synchronized (packetList) {
+//			synchronized (packetList) {
 				// while (true) {
 				// Try sending as long as there are packets left to send
 				if (sendQueue.size() > 0 || expectedACK.size() > 0) {
@@ -160,6 +160,7 @@ public class ReliableChannel implements NetworkListener {
 									currentWindow.get(sendIndex).getBytes());
 							networkPacket
 									.setFlags(NetworkPacket.TRANSPORT_FLAG);
+							
 							// Check whether ACK has been removed from the list
 							// of
 							// expected ACKS or packet is an ACK packet
@@ -219,7 +220,7 @@ public class ReliableChannel implements NetworkListener {
 						}
 					}
 				}
-			}
+//			}
 
 			// }
 
