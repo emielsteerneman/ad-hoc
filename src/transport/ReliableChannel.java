@@ -109,6 +109,8 @@ public class ReliableChannel implements NetworkListener {
 						// sendQueue.poll();
 						if (!t.isFlagSet(TransportPacket.ACK_FLAG)) {
 							expectedACK.add(t.getAcknowledgeNumber());
+						}else{
+							System.out.println("ACK_FLAG SET " +t.getAcknowledgeNumber());
 						}
 						currentWindow.add(t);
 						// Reset sendIndex to 0 to start at the beginning of
@@ -190,6 +192,7 @@ public class ReliableChannel implements NetworkListener {
 							// System.out.println("window empty. removing send packets from list");
 							for (int i = 0; i < currentWindow.size(); i++) {
 								if (sendQueue.size() > 0) {
+									System.out.println("Removing");
 									sendQueue.remove(0);
 								}
 							}
