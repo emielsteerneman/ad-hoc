@@ -8,6 +8,7 @@ import java.util.List;
 
 public class NetworkPacket {
 	public static final byte ARP_FLAG = 0b00000001;
+	public static final byte TRANSPORT_FLAG = 0b00000010;
 	
 	byte flags = 0;
 	byte hopcount = 0;

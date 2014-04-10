@@ -17,30 +17,38 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 		if (networkPacket.isFlagSet(NetworkPacket.ARP_FLAG)) {
 			if (!networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
 				networkInterface.process(networkPacket);
+				
+				if (networkPacket.getHopcount() > 0) {
+					networkPacket.decrementHopcount();
+					networkInterface.send(networkPacket);
+				}
 			}
 			
 			return;
 		}
 		
-		
-		if (!networkPacket.getDestinationAddresses().contains(networkInterface.getLocalHost())) {
-			if (networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
-				return;
-			}
-			
-			if (networkPacket.getHopcount() > 0) {
-				networkPacket.decrementHopcount();
-				networkInterface.send(networkPacket);
+		if (networkPacket.isFlagSet(NetworkPacket.TRANSPORT_FLAG)) {
+			if (!networkPacket.getDestinationAddresses().contains(networkInterface.getLocalHost())) {
+				if (networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
+					return;
+				}
+				
+				if (networkPacket.getHopcount() > 0) {
+					networkPacket.decrementHopcount();
+					networkInterface.send(networkPacket);
+				} else {
+					return;
+				}
 			} else {
-				return;
-			}
-		} else {
-			if (networkPacket.getHopcount() >= 0) {
-				networkInterface.process(networkPacket);
-			} else {
-				networkInterface.send(networkPacket);
-			}
+				if (networkPacket.getHopcount() >= 0) {
+					networkInterface.process(networkPacket);
+				} else {
+					networkInterface.send(networkPacket);
+				}
+			}	
 		}
+		
+		//etc
 	}
 	
 }
