@@ -311,6 +311,9 @@ public class ReliableChannel implements NetworkListener {
 							received.getAcknowledgeNumber(),
 							TransportPacket.ACK_FLAG,
 							received.getStreamNumber(), new byte[0]);
+					//
+					transportPacket.setAcknowledgeNumber(received.getAcknowledgeNumber());
+					//
 					System.out.println("SENDING ACK: "
 							+ received.getSequenceNumber());
 					System.out.print("ACK_PACK: ");
