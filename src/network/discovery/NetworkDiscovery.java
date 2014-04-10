@@ -68,6 +68,8 @@ public class NetworkDiscovery implements NetworkListener {
 			return;
 		}
 		
+		System.out.println("RECEIVE " + new String(packet.getData()));
+		
 		if (devices.containsKey(packet.getSourceAddress())) {
 			timeouts.put(packet.getSourceAddress(), NetworkDiscovery.TIMEOUT);
 		} else {

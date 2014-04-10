@@ -17,11 +17,15 @@ public class Main implements NetworkDiscoveryListener {
 	@Override
 	public void onDeviceDiscovery(InetAddress device, String identifier) {
 		devices.put(device, identifier);
+		
+		System.out.println(devices);
 	}
 
 	@Override
 	public void onDeviceTimeout(InetAddress device) {
 		devices.remove(device);
+		
+		System.out.println(devices);
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
@@ -41,16 +45,16 @@ public class Main implements NetworkDiscoveryListener {
 		networkInterface.addNetworkListener(networkDiscovery);
 		
 		
-		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.130.41"), InetAddress.getByName("130.89.130.15"), networkInterface);
-
-		networkInterface.addNetworkListener(channel);
-		
-		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
-		
-		out.write(new String(new byte[1000]));
-		out.newLine();
-		out.flush();
-		
+//		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.130.41"), InetAddress.getByName("130.89.130.15"), networkInterface);
+//
+//		networkInterface.addNetworkListener(channel);
+//		
+//		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
+//		
+//		out.write(new String(new byte[1000]));
+//		out.newLine();
+//		out.flush();
+//		
 		
 	}
 	
