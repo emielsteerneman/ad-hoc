@@ -44,7 +44,7 @@ public class NetworkPacket {
 	
 	public boolean isFlagSet(byte flag) {
 		return (flags & flag) == flag;
-	}	
+	}
 	
 	public byte getReserved() {
 		return reserved;

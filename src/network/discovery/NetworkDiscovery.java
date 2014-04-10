@@ -60,7 +60,7 @@ public class NetworkDiscovery implements NetworkListener {
 		this.devices = new HashMap<>();
 		this.timeouts = new HashMap<>();
 		this.timer = new Timer();
-		this.timer.scheduleAtFixedRate(new BroadcastTask(), DELAY, DELAY);
+		this.timer.scheduleAtFixedRate(new BroadcastTask(), 0L, DELAY);
 	}
 	
 	@Override
@@ -68,8 +68,6 @@ public class NetworkDiscovery implements NetworkListener {
 		if (!packet.isFlagSet(NetworkPacket.ARP_FLAG)) {
 			return;
 		}
-		
-		System.out.println("RECEIVE " + new String(packet.getData()));
 		
 		if (devices.containsKey(packet.getSourceAddress())) {
 			timeouts.put(packet.getSourceAddress(), NetworkDiscovery.TIMEOUT);

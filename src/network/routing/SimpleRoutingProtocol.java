@@ -25,7 +25,7 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 			}
 			
 			return;
-		}
+		} 
 		
 		if (networkPacket.isFlagSet(NetworkPacket.TRANSPORT_FLAG)) {
 			if (!networkPacket.getDestinationAddresses().contains(networkInterface.getLocalHost())) {
@@ -40,12 +40,14 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 					return;
 				}
 			} else {
-				if (networkPacket.getHopcount() >= 0) {
+				if (networkPacket.getHopcount() >= 0) {					
 					networkInterface.process(networkPacket);
 				} else {
 					networkInterface.send(networkPacket);
 				}
 			}
+			
+			return;
 		}
 	}
 	

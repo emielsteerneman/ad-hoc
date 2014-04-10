@@ -67,7 +67,6 @@ public class ReliableChannel implements NetworkListener {
 	// Reads the queue of the channel and sends data in a windows. continues
 	// after every send packet is ack'ed
 	private class QueueSender extends TimerTask {
-		private ArrayList<TransportPacket> sendQueue;
 		private int currentStream;
 
 		private int sendIndex;
@@ -84,7 +83,6 @@ public class ReliableChannel implements NetworkListener {
 		}
 
 		public QueueSender(ArrayList<TransportPacket> queue) {
-			this.sendQueue = queue;
 			expectedACK = new ArrayList<Integer>();
 			currentWindow = new ArrayList<TransportPacket>();
 		}
@@ -95,18 +93,18 @@ public class ReliableChannel implements NetworkListener {
 		private void fillWindow() {
 			int index = 0;
 			if (currentWindow.size() == 0) {
-				while (currentWindow.size() < WNDSZ && sendQueue.size() > 0
-						&& index < sendQueue.size()) {
+				while (currentWindow.size() < WNDSZ && packetList.size() > 0
+						&& index < packetList.size()) {
 					// System.out.print("filling window--");
 					TransportPacket t = null;
 					// fill expectedACK with next seqs
-					t = sendQueue.get(index);
+					t = packetList.get(index);
 					// Check whether packet has same stream number
 					if (t.getStreamNumber() != this.currentStream) {
 						break;
 					} else {
 						// If not continue polling and adding expected ACK's
-						// sendQueue.poll();
+						// packetList.poll();
 						if (!t.isFlagSet(TransportPacket.ACK_FLAG)) {
 							expectedACK.add(t.getSequenceNumber());
 						} else {
@@ -133,20 +131,20 @@ public class ReliableChannel implements NetworkListener {
 				// while (true) {
 				// Try sending as long as there are packets left to send
 				System.out.println("TICK");
-				if (sendQueue.size() > 0 || expectedACK.size() > 0) {
-
+				if (packetList.size() > 0 || expectedACK.size() > 0) {
+					System.out.println("HI");
 					// Check whether the first packet in the queue has a new
 					// streamIndex -> increment streamIndex
 					// Starts transmission of a new file\message
 					if (expectedACK.size() == 0
-							&& sendQueue.get(0).getStreamNumber() != this.currentStream) {
+							&& packetList.get(0).getStreamNumber() != this.currentStream) {
 						currentStream++;
 						// System.out.println("                   NEW STREAM: "
 						// + currentStream);
 					}
 					this.fillWindow();
 					// System.out.println("queue: "+
-					// sendQueue.size()+", window"+currentWindow.size());
+					// packetList.size()+", window"+currentWindow.size());
 					// If all packets have been ack'ed, read load next packets
 					// for in send queue
 					//
@@ -201,9 +199,9 @@ public class ReliableChannel implements NetworkListener {
 								// new Stream
 								// System.out.println("window empty. removing send packets from list");
 								for (int i = 0; i < currentWindow.size(); i++) {
-									if (sendQueue.size() > 0) {
+									if (packetList.size() > 0) {
 										// System.out.println("Removing");
-										sendQueue.remove(0);
+										packetList.remove(0);
 									}
 								}
 								currentWindow.clear();

@@ -31,6 +31,7 @@ public class NetworkInterface extends Thread {
 	private RoutingProtocol routingProtocol;
 	
 	private Queue<NetworkPacket> localQueue;
+	private Queue<NetworkPacket> sendQueue;
 	
 	private class QueueProcessor implements Runnable {
 		@Override
@@ -46,7 +47,9 @@ public class NetworkInterface extends Thread {
 				
 				try {
 					routingProtocol.rout(localQueue.poll());
-				} catch (IOException e) { }
+				} catch (IOException e) { 
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -78,7 +81,6 @@ public class NetworkInterface extends Thread {
 
 			try {
 				receiveSocket.receive(packet);
-				
 			} catch (IOException e) {
 				packet = null;
 			}
@@ -90,7 +92,7 @@ public class NetworkInterface extends Thread {
 					synchronized (localQueue) {
 						localQueue.add(networkPacket);
 						localQueue.notify();
-					}	
+					}
 				}
 			}
 		}
@@ -120,6 +122,8 @@ public class NetworkInterface extends Thread {
 		byte[] packetData = networkPacket.getBytes();
 
 		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, port);
+		
+		System.out.println("packet send");
 		
 		sendSocket.send(packet);
 	}
