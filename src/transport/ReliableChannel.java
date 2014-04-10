@@ -1,13 +1,16 @@
 package transport;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -322,7 +325,10 @@ public class ReliableChannel implements NetworkListener {
 		public void run() {
 			while (true) {
 				if (queueSender.expectedACK.size() > 0) {
-					queueSender.receivedACK(0, queueSender.expectedACK.get(0));
+					TransportPacket pac = new TransportPacket(new byte[0]);
+					pac.setAcknowledgeNumber(queueSender.expectedACK.get(0));
+					onReceive(new NetworkPacket(address, localAddress, (byte)1, pac.getBytes()));
+//					queueSender.receivedACK(0, queueSender.expectedACK.get(0));
 				}
 				try {
 					Thread.sleep(100);
@@ -332,6 +338,26 @@ public class ReliableChannel implements NetworkListener {
 				}
 			}
 		}
+	}
+	public static void main(String[] args) throws UnknownHostException, IOException{
+		NetworkInterface networkInterface = new NetworkInterface(InetAddress.getByName("130.89.130.41"), 55555);
+		networkInterface.start();
+//		
+//		NetworkDiscovery networkDiscovery = new NetworkDiscovery(networkInterface, "yolo");
+//		networkDiscovery.setNetworkDiscoveryListener(this);
+//		
+//		networkInterface.addNetworkListener(networkDiscovery);
+		
+		
+		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.130.41"), InetAddress.getByName("130.89.130.15"), networkInterface);
+
+		networkInterface.addNetworkListener(channel);
+		
+		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
+		
+		out.write(new String(new byte[1000]));
+		out.newLine();
+		out.flush();
 	}
 
 }
