@@ -288,7 +288,7 @@ public class ReliableChannel implements NetworkListener {
 		// Check whether incoming packet is for local ip
 		System.out.println(address.toString() + " - "
 				+ packet.getSourceAddress().toString());
-//		if (packet.getSourceAddress().equals(address)) {
+		if (packet.getSourceAddress().equals(address)) {
 			System.out.println("HERE");
 			// Check whether packet is an ACK
 			TransportPacket received = TransportPacket.parseBytes(packet
@@ -315,7 +315,7 @@ public class ReliableChannel implements NetworkListener {
 
 				}
 			}
-//		}
+		}
 
 	}
 
