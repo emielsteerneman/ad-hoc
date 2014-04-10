@@ -132,6 +132,7 @@ public class ReliableChannel implements NetworkListener {
 //			synchronized (packetList) {
 				// while (true) {
 				// Try sending as long as there are packets left to send
+				System.out.println("TICK");
 				if (sendQueue.size() > 0 || expectedACK.size() > 0) {
 
 					// Check whether the first packet in the queue has a new
