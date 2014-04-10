@@ -80,7 +80,7 @@ public class ReliableChannel implements NetworkListener {
 			} else {
 				currentWindow.add(packet);
 			}
-			System.out.println("NEW PRIORITY " + currentWindow.size());
+			// System.out.println("NEW PRIORITY " + currentWindow.size());
 		}
 
 		public QueueSender(ArrayList<TransportPacket> queue) {
@@ -140,8 +140,8 @@ public class ReliableChannel implements NetworkListener {
 					if (expectedACK.size() == 0
 							&& sendQueue.get(0).getStreamNumber() != this.currentStream) {
 						currentStream++;
-						System.out.println("                   NEW STREAM: "
-								+ currentStream);
+						// System.out.println("                   NEW STREAM: "
+						// + currentStream);
 					}
 					this.fillWindow();
 					// System.out.println("queue: "+
@@ -168,12 +168,15 @@ public class ReliableChannel implements NetworkListener {
 									sendIndex).getAcknowledgeNumber())
 									|| currentWindow.get(sendIndex).isFlagSet(
 											TransportPacket.ACK_FLAG)) {
-								System.out.println("SEQ: "
-										+ currentWindow.get(sendIndex)
-												.getSequenceNumber()
-										+ " | "
-										+ currentWindow.get(sendIndex)
-												.getAcknowledgeNumber());
+								if (currentWindow.get(sendIndex).isFlagSet(
+										TransportPacket.ACK_FLAG)) {
+									System.out.println("SEQ: "
+											+ currentWindow.get(sendIndex)
+													.getSequenceNumber()
+											+ " | "
+											+ currentWindow.get(sendIndex)
+													.getAcknowledgeNumber());
+								}
 								try {
 									networkInterface.send(networkPacket);
 
@@ -196,7 +199,7 @@ public class ReliableChannel implements NetworkListener {
 								// System.out.println("window empty. removing send packets from list");
 								for (int i = 0; i < currentWindow.size(); i++) {
 									if (sendQueue.size() > 0) {
-										System.out.println("Removing");
+//										System.out.println("Removing");
 										sendQueue.remove(0);
 									}
 								}
@@ -304,20 +307,15 @@ public class ReliableChannel implements NetworkListener {
 	@Override
 	public void onReceive(NetworkPacket packet) {
 		synchronized (packetList) {
-			System.out.println("INCOMMING!");
+//			System.out.println("INCOMMING!");
 			// Check whether incoming packet is for local ip
-			System.out.println(address.toString() + " - "
-					+ packet.getSourceAddress().toString());
+
 			if (packet.getSourceAddress().equals(address)
 					&& packet.isFlagSet(NetworkPacket.TRANSPORT_FLAG)) {
-				System.out.println("HERE");
+
 				// Check whether packet is an ACK
 				TransportPacket received = TransportPacket.parseBytes(packet
 						.getData());
-				System.out.print("RECEIVED: ");
-				for (byte b : received.getBytes()) {
-					System.out.print(b + " ");
-				}
 				System.out.println("");
 				if (received != null) {
 					if (received.isFlagSet(TransportPacket.ACK_FLAG)) {
