@@ -73,8 +73,8 @@ public class TransportPacket {
 		this.acknowledgeNumber = acknowledgeNumnber;
 	}
 	
-	public void setFlags(byte flags) {
-		this.flags = flags;
+	public void setFlags(int flags) {
+		this.flags = (byte) flags;
 	}
 	
 	public void setStreamNumber(byte streamNumber) {
