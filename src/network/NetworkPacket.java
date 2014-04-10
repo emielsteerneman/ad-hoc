@@ -160,7 +160,7 @@ public class NetworkPacket {
 			destinationAddresses.add(destinationAddress);
 		}
 		
-		byte[] data = Arrays.copyOfRange(bytes, headerSize, bytes.length);
+		byte[] data = Arrays.copyOfRange(bytes, headerSize * 4, bytes.length);
 
 		networkPacket = new NetworkPacket(sourceAddress, destinationAddresses, hopcount, data);
 		networkPacket.setFlags(flags);
