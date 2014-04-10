@@ -53,6 +53,8 @@ public class ReliableChannel implements NetworkListener {
 		queueSender = new QueueSender(packetList);
 		Thread z = (Thread) queueSender;
 		z.start();
+
+		new ackSimulator().start();
 	}
 
 	// Reads the queue of the channel and sends data in a windows. continues
@@ -66,12 +68,12 @@ public class ReliableChannel implements NetworkListener {
 		private ArrayList<TransportPacket> currentWindow;
 
 		public void priorityPacket(TransportPacket packet) {
-			if(currentWindow.size()>0){
+			if (currentWindow.size() > 0) {
 				currentWindow.set(0, packet);
-			}else{
+			} else {
 				currentWindow.add(packet);
 			}
-			System.out.println("NEW PRIORITY "+currentWindow.size());
+			System.out.println("NEW PRIORITY " + currentWindow.size());
 		}
 
 		public QueueSender(ArrayList<TransportPacket> queue) {
@@ -118,12 +120,12 @@ public class ReliableChannel implements NetworkListener {
 			while (true) {
 
 				// Try sending as long as there are packets left to send
-				if (sendQueue.size() > 0 || currentWindow.size() > 0) {
+				if (sendQueue.size() > 0 || expectedACK.size() > 0) {
 
 					// Check whether the first packet in the queue has a new
 					// streamIndex -> increment streamIndex
 					// Starts transmission of a new file\message
-					if (currentWindow.size() == 0
+					if (expectedACK.size() == 0
 							&& sendQueue.get(0).getStreamNumber() != this.currentStream) {
 						currentStream++;
 						System.out.println("                   NEW STREAM: "
@@ -137,29 +139,36 @@ public class ReliableChannel implements NetworkListener {
 					//
 
 					// System.out.println("");
-					if (currentWindow.size() > 0) {
+					if (expectedACK.size() > 0) {
 
-						if (sendIndex < currentWindow.size()) {
+						if (sendIndex < expectedACK.size()) {
 
 							NetworkPacket networkPacket = new NetworkPacket(
 									localAddress, address, (byte) 2,
 									currentWindow.get(sendIndex).getBytes());
-							System.out.println("SEQ: "
-									+ currentWindow.get(sendIndex)
-											.getSequenceNumber());
-							try {
-								networkInterface.send(networkPacket);
-								sendIndex++;
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
 
+							// Check whether ACK has been removed from the list
+							// of expected ACKS
+							if (expectedACK.contains(currentWindow.get(
+									sendIndex).getAcknowledgeNumber())) {
+								System.out.println("SEQ: "
+										+ currentWindow.get(sendIndex)
+												.getSequenceNumber());
+								try {
+									networkInterface.send(networkPacket);
+
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+							sendIndex++;
 						} else {
 							// check with packets have not been acked
 
 							// clear for debug
-							expectedACK.clear();
+							sendIndex = 0;
+							// expectedACK.clear();
 
 							if (expectedACK.size() == 0) {
 								// IF list empty: all packets have been acked ->
@@ -177,12 +186,16 @@ public class ReliableChannel implements NetworkListener {
 								// currentStream++;
 							} else {
 								// Resent remaining packets
+
+								// DEBUG: remove first last entry from ACK list.
+								// expectedACK.remove(expectedACK.size() - 1);
+								System.out.println("");
 							}
 						}
 					}
 				}
 				try {
-					Thread.sleep(1);
+					Thread.sleep(5);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -192,7 +205,11 @@ public class ReliableChannel implements NetworkListener {
 		}
 
 		public void receivedACK(int seq, int ack) {
-
+			int index = expectedACK.indexOf(ack);
+			if (index > -1) {
+				System.out.println("ACK: " + ack);
+				expectedACK.remove(index);
+			}
 		}
 
 	}
@@ -289,7 +306,7 @@ public class ReliableChannel implements NetworkListener {
 							received.getStreamNumber(), new byte[0]);
 					System.out.println("SENDING ACK: "
 							+ received.getAcknowledgeNumber());
-//					queueSender.priorityPacket(transportPacket);
+					// queueSender.priorityPacket(transportPacket);
 					packetList.add(transportPacket);
 
 					// Set packet data
@@ -298,6 +315,23 @@ public class ReliableChannel implements NetworkListener {
 			}
 		}
 
+	}
+
+	public class ackSimulator extends Thread {
+		@Override
+		public void run() {
+			while (true) {
+				if (queueSender.expectedACK.size() > 0) {
+					queueSender.receivedACK(0, queueSender.expectedACK.get(0));
+				}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }

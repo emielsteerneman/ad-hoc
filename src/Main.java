@@ -42,7 +42,7 @@ public class Main implements NetworkDiscoveryListener {
 		
 		
 		ReliableChannel channel = new ReliableChannel(InetAddress.getByName("130.89.130.41"), InetAddress.getByName("130.89.130.15"), networkInterface);
-		
+
 		networkInterface.addNetworkListener(channel);
 		
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
@@ -50,6 +50,8 @@ public class Main implements NetworkDiscoveryListener {
 		out.write(new String(new byte[1000]));
 		out.newLine();
 		out.flush();
+		
+		
 	}
 	
 }
