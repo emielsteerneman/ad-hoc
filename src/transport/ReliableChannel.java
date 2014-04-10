@@ -73,7 +73,7 @@ public class ReliableChannel implements NetworkListener {
 		private int sendIndex;
 		private ArrayList<Integer> expectedACK;
 		private ArrayList<TransportPacket> currentWindow;
-
+		private ArrayList<TransportPacket> newPackets = new ArrayList<TransportPacket>();
 		public void priorityPacket(TransportPacket packet) {
 			if (currentWindow.size() > 0) {
 				currentWindow.set(0, packet);
@@ -319,7 +319,7 @@ public class ReliableChannel implements NetworkListener {
 
 	@Override
 	public void onReceive(NetworkPacket packet) {
-		synchronized (packetList) {
+//		synchronized (packetList) {
 			System.out.println("INCOMMING!");
 			// Check whether incoming packet is for local ip
 
@@ -361,7 +361,7 @@ public class ReliableChannel implements NetworkListener {
 					}
 				}
 			}
-		}
+//		}
 
 	}
 
