@@ -60,7 +60,7 @@ public class NetworkDiscovery implements NetworkListener {
 		this.devices = new HashMap<>();
 		this.timeouts = new HashMap<>();
 		this.timer = new Timer();
-		this.timer.schedule(new BroadcastTask(), DELAY);
+		this.timer.scheduleAtFixedRate(new BroadcastTask(), DELAY, DELAY);
 	}
 	
 	@Override
