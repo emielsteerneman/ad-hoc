@@ -108,7 +108,7 @@ public class ReliableChannel implements NetworkListener {
 						// If not continue polling and adding expected ACK's
 						// sendQueue.poll();
 						if (!t.isFlagSet(TransportPacket.ACK_FLAG)) {
-							expectedACK.add(t.getAcknowledgeNumber());
+							expectedACK.add(t.getSequenceNumber());
 						} else {
 							System.out.println("ACK_FLAG SET "
 									+ t.getAcknowledgeNumber());
@@ -179,6 +179,7 @@ public class ReliableChannel implements NetworkListener {
 								}
 								try {
 									networkInterface.send(networkPacket);
+									System.out.println("send");
 
 								} catch (IOException e) {
 									// TODO Auto-generated catch block
@@ -199,7 +200,7 @@ public class ReliableChannel implements NetworkListener {
 								// System.out.println("window empty. removing send packets from list");
 								for (int i = 0; i < currentWindow.size(); i++) {
 									if (sendQueue.size() > 0) {
-//										System.out.println("Removing");
+										// System.out.println("Removing");
 										sendQueue.remove(0);
 									}
 								}
@@ -225,11 +226,23 @@ public class ReliableChannel implements NetworkListener {
 		}
 
 		public void receivedACK(int seq, int ack) {
+			System.out.println(" _ __ _ __ _ __ _  _ __ _ _ _ __ _");
+			System.out.print("ACKEXP: ");
+			for(int i : expectedACK){
+				System.out.print(i+" ");
+			}
+			System.out.println("");
 			int index = expectedACK.indexOf(ack);
 			if (index > -1) {
 				System.out.println("ACK: " + ack);
 				expectedACK.remove(index);
 			}
+			System.out.println(" _ __ _ __ _ __ _  _ __ _ _ _ __ _");
+			System.out.print("ACKEXP: ");
+			for(int i : expectedACK){
+				System.out.print(i+" ");
+			}
+			System.out.println("");
 		}
 
 	}
@@ -307,7 +320,7 @@ public class ReliableChannel implements NetworkListener {
 	@Override
 	public void onReceive(NetworkPacket packet) {
 		synchronized (packetList) {
-//			System.out.println("INCOMMING!");
+			System.out.println("INCOMMING!");
 			// Check whether incoming packet is for local ip
 
 			if (packet.getSourceAddress().equals(address)
@@ -321,6 +334,7 @@ public class ReliableChannel implements NetworkListener {
 					if (received.isFlagSet(TransportPacket.ACK_FLAG)) {
 						System.out.println("GOT ACK "
 								+ received.getAcknowledgeNumber());
+						queueSender.receivedACK(0, received.getAcknowledgeNumber());
 						// React to ACK
 					} else {
 						// IF ACK field == -1 -> data packet
@@ -331,19 +345,16 @@ public class ReliableChannel implements NetworkListener {
 								TransportPacket.ACK_FLAG,
 								received.getStreamNumber(), new byte[0]);
 						//
-						transportPacket.setAcknowledgeNumber(received
-								.getAcknowledgeNumber());
+						
+
 						//
 						System.out.println("SENDING ACK: "
 								+ received.getSequenceNumber());
-						System.out.print("ACK_PACK: ");
-						byte[] packetBytes = transportPacket.getBytes();
-						for (byte b : packetBytes) {
-							System.out.print(b);
-						}
-						System.out.println("");
+						transportPacket.setAcknowledgeNumber(received
+								.getSequenceNumber());
 						// queueSender.priorityPacket(transportPacket);
-						packetList.add(transportPacket);
+						// packetList.add(transportPacket);
+						queueSender.priorityPacket(transportPacket);
 
 						// Set packet data
 
@@ -378,7 +389,7 @@ public class ReliableChannel implements NetworkListener {
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
 		NetworkInterface networkInterface = new NetworkInterface(
-				InetAddress.getByName("130.89.130.41"), 55555);
+				InetAddress.getByName("130.89.130.15"), 55555);
 		networkInterface.start();
 		//
 		// NetworkDiscovery networkDiscovery = new
@@ -388,7 +399,7 @@ public class ReliableChannel implements NetworkListener {
 		// networkInterface.addNetworkListener(networkDiscovery);
 
 		ReliableChannel channel = new ReliableChannel(
-				InetAddress.getByName("130.89.130.41"),
+				InetAddress.getByName("130.89.130.15"),
 				InetAddress.getByName("130.89.130.15"), networkInterface);
 
 		networkInterface.addNetworkListener(channel);
