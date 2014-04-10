@@ -257,8 +257,7 @@ public class ReliableChannel implements NetworkListener {
 
 		public void run() {
 			while (true) {
-				// if(in.)
-				synchronized (packetList) {
+				
 					try {
 						byte[] data = in.readLine().getBytes();
 						int dataPosition = 0;
@@ -306,7 +305,7 @@ public class ReliableChannel implements NetworkListener {
 					streamNumber++;
 				}
 			}
-		}
+		
 	}
 
 	public OutputStream getOutputStream() {
