@@ -109,8 +109,9 @@ public class ReliableChannel implements NetworkListener {
 						// sendQueue.poll();
 						if (!t.isFlagSet(TransportPacket.ACK_FLAG)) {
 							expectedACK.add(t.getAcknowledgeNumber());
-						}else{
-							System.out.println("ACK_FLAG SET " +t.getAcknowledgeNumber());
+						} else {
+							System.out.println("ACK_FLAG SET "
+									+ t.getAcknowledgeNumber());
 						}
 						currentWindow.add(t);
 						// Reset sendIndex to 0 to start at the beginning of
@@ -128,85 +129,89 @@ public class ReliableChannel implements NetworkListener {
 		// TODO: ACK, set ack/seq numbers of transportPackets, priority packets
 		// (replace first packet in send queue)
 		public synchronized void run() {
-			// while (true) {
-			// Try sending as long as there are packets left to send
-			if (sendQueue.size() > 0 || expectedACK.size() > 0) {
+			synchronized (packetList) {
+				// while (true) {
+				// Try sending as long as there are packets left to send
+				if (sendQueue.size() > 0 || expectedACK.size() > 0) {
 
-				// Check whether the first packet in the queue has a new
-				// streamIndex -> increment streamIndex
-				// Starts transmission of a new file\message
-				if (expectedACK.size() == 0
-						&& sendQueue.get(0).getStreamNumber() != this.currentStream) {
-					currentStream++;
-					System.out.println("                   NEW STREAM: "
-							+ currentStream);
-				}
-				this.fillWindow();
-				// System.out.println("queue: "+
-				// sendQueue.size()+", window"+currentWindow.size());
-				// If all packets have been ack'ed, read load next packets
-				// for in send queue
-				//
+					// Check whether the first packet in the queue has a new
+					// streamIndex -> increment streamIndex
+					// Starts transmission of a new file\message
+					if (expectedACK.size() == 0
+							&& sendQueue.get(0).getStreamNumber() != this.currentStream) {
+						currentStream++;
+						System.out.println("                   NEW STREAM: "
+								+ currentStream);
+					}
+					this.fillWindow();
+					// System.out.println("queue: "+
+					// sendQueue.size()+", window"+currentWindow.size());
+					// If all packets have been ack'ed, read load next packets
+					// for in send queue
+					//
 
-				// System.out.println("");
-				if (currentWindow.size() > 0) {
+					// System.out.println("");
+					if (currentWindow.size() > 0) {
 
-					if (sendIndex < currentWindow.size()) {
+						if (sendIndex < currentWindow.size()) {
 
-						NetworkPacket networkPacket = new NetworkPacket(
-								localAddress, address, (byte) 2, currentWindow
-										.get(sendIndex).getBytes());
-						networkPacket.setFlags(NetworkPacket.TRANSPORT_FLAG);
-						// Check whether ACK has been removed from the list of
-						// expected ACKS or packet is an ACK packet
+							NetworkPacket networkPacket = new NetworkPacket(
+									localAddress, address, (byte) 2,
+									currentWindow.get(sendIndex).getBytes());
+							networkPacket
+									.setFlags(NetworkPacket.TRANSPORT_FLAG);
+							// Check whether ACK has been removed from the list
+							// of
+							// expected ACKS or packet is an ACK packet
 
-						if (expectedACK.contains(currentWindow.get(sendIndex)
-								.getAcknowledgeNumber())
-								|| currentWindow.get(sendIndex).isFlagSet(
-										TransportPacket.ACK_FLAG)) {
-							System.out.println("SEQ: "
-									+ currentWindow.get(sendIndex)
-											.getSequenceNumber()
-									+ " | "
-									+ currentWindow.get(sendIndex)
-											.getAcknowledgeNumber());
-							try {
-								networkInterface.send(networkPacket);
+							if (expectedACK.contains(currentWindow.get(
+									sendIndex).getAcknowledgeNumber())
+									|| currentWindow.get(sendIndex).isFlagSet(
+											TransportPacket.ACK_FLAG)) {
+								System.out.println("SEQ: "
+										+ currentWindow.get(sendIndex)
+												.getSequenceNumber()
+										+ " | "
+										+ currentWindow.get(sendIndex)
+												.getAcknowledgeNumber());
+								try {
+									networkInterface.send(networkPacket);
 
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						sendIndex++;
-					} else {
-						// check with packets have not been acked
-
-						// clear for debug
-						sendIndex = 0;
-						// expectedACK.clear();
-
-						if (expectedACK.size() == 0) {
-							// IF list empty: all packets have been acked ->
-							// new Stream
-							// System.out.println("window empty. removing send packets from list");
-							for (int i = 0; i < currentWindow.size(); i++) {
-								if (sendQueue.size() > 0) {
-									System.out.println("Removing");
-									sendQueue.remove(0);
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
 							}
-							currentWindow.clear();
-
-							// REMOVE PACKETS FROM LIST
-
-							// currentStream++;
+							sendIndex++;
 						} else {
-							// Resent remaining packets
+							// check with packets have not been acked
 
-							// DEBUG: remove first last entry from ACK list.
-							// expectedACK.remove(expectedACK.size() - 1);
-							System.out.println("--------------------");
+							// clear for debug
+							sendIndex = 0;
+							// expectedACK.clear();
+
+							if (expectedACK.size() == 0) {
+								// IF list empty: all packets have been acked ->
+								// new Stream
+								// System.out.println("window empty. removing send packets from list");
+								for (int i = 0; i < currentWindow.size(); i++) {
+									if (sendQueue.size() > 0) {
+										System.out.println("Removing");
+										sendQueue.remove(0);
+									}
+								}
+								currentWindow.clear();
+
+								// REMOVE PACKETS FROM LIST
+
+								// currentStream++;
+							} else {
+								// Resent remaining packets
+
+								// DEBUG: remove first last entry from ACK list.
+								// expectedACK.remove(expectedACK.size() - 1);
+								System.out.println("--------------------");
+							}
 						}
 					}
 				}
@@ -237,49 +242,53 @@ public class ReliableChannel implements NetworkListener {
 		public void run() {
 			while (true) {
 				// if(in.)
-				try {
-					byte[] data = in.readLine().getBytes();
-					int dataPosition = 0;
+				synchronized (packetList) {
+					try {
+						byte[] data = in.readLine().getBytes();
+						int dataPosition = 0;
 
-					while (data.length - dataPosition > MSS) {
-						// System.out.println(data.length + ", " + dataPosition
-						// + " -- " + MSS);
+						while (data.length - dataPosition > MSS) {
+							// System.out.println(data.length + ", " +
+							// dataPosition
+							// + " -- " + MSS);
 
-						byte[] packetData = Arrays.copyOfRange(data,
-								dataPosition, dataPosition + MSS);
+							byte[] packetData = Arrays.copyOfRange(data,
+									dataPosition, dataPosition + MSS);
 
-						TransportPacket transportPacket = new TransportPacket(
-								packetData);
-						// Set packet data
-						transportPacket.setStreamNumber(streamNumber);
-						transportPacket.setSequenceNumber(seqNumber);
-						// transportPacket.setAcknowledgeNumber(seqNumber);
-						packetList.add(transportPacket);
+							TransportPacket transportPacket = new TransportPacket(
+									packetData);
+							// Set packet data
+							transportPacket.setStreamNumber(streamNumber);
+							transportPacket.setSequenceNumber(seqNumber);
+							// transportPacket.setAcknowledgeNumber(seqNumber);
+							packetList.add(transportPacket);
 
-						dataPosition += MSS;
+							dataPosition += MSS;
+							seqNumber++;
+						}
+						if (dataPosition < data.length) {
+							byte[] packetData = new byte[data.length
+									- dataPosition];
+
+							System.arraycopy(data, dataPosition, packetData, 0,
+									packetData.length);
+
+							TransportPacket transportPacket = new TransportPacket(
+									packetData);
+							// Set packet data
+							transportPacket.setStreamNumber(streamNumber);
+							transportPacket.setSequenceNumber(seqNumber);
+							transportPacket.setAcknowledgeNumber(seqNumber);
+							packetList.add(transportPacket);
+
+						}
 						seqNumber++;
+					} catch (IOException e) {
 					}
-					if (dataPosition < data.length) {
-						byte[] packetData = new byte[data.length - dataPosition];
-
-						System.arraycopy(data, dataPosition, packetData, 0,
-								packetData.length);
-
-						TransportPacket transportPacket = new TransportPacket(
-								packetData);
-						// Set packet data
-						transportPacket.setStreamNumber(streamNumber);
-						transportPacket.setSequenceNumber(seqNumber);
-						transportPacket.setAcknowledgeNumber(seqNumber);
-						packetList.add(transportPacket);
-
-					}
-					seqNumber++;
-				} catch (IOException e) {
+					//
+					seqNumber = 0;
+					streamNumber++;
 				}
-				//
-				seqNumber = 0;
-				streamNumber++;
 			}
 		}
 	}
@@ -294,51 +303,53 @@ public class ReliableChannel implements NetworkListener {
 
 	@Override
 	public void onReceive(NetworkPacket packet) {
-		System.out.println("INCOMMING!");
-		// Check whether incoming packet is for local ip
-		System.out.println(address.toString() + " - "
-				+ packet.getSourceAddress().toString());
-		if (packet.getSourceAddress().equals(address)
-				&& packet.isFlagSet(NetworkPacket.TRANSPORT_FLAG)) {
-			System.out.println("HERE");
-			// Check whether packet is an ACK
-			TransportPacket received = TransportPacket.parseBytes(packet
-					.getData());
-			System.out.print("RECEIVED: ");
-			for (byte b : received.getBytes()) {
-				System.out.print(b + " ");
-			}
-			System.out.println("");
-			if (received != null) {
-				if (received.isFlagSet(TransportPacket.ACK_FLAG)) {
-					System.out.println("GOT ACK "
-							+ received.getAcknowledgeNumber());
-					// React to ACK
-				} else {
-					// IF ACK field == -1 -> data packet
-					// -> add to queue and send ack
+		synchronized (packetList) {
+			System.out.println("INCOMMING!");
+			// Check whether incoming packet is for local ip
+			System.out.println(address.toString() + " - "
+					+ packet.getSourceAddress().toString());
+			if (packet.getSourceAddress().equals(address)
+					&& packet.isFlagSet(NetworkPacket.TRANSPORT_FLAG)) {
+				System.out.println("HERE");
+				// Check whether packet is an ACK
+				TransportPacket received = TransportPacket.parseBytes(packet
+						.getData());
+				System.out.print("RECEIVED: ");
+				for (byte b : received.getBytes()) {
+					System.out.print(b + " ");
+				}
+				System.out.println("");
+				if (received != null) {
+					if (received.isFlagSet(TransportPacket.ACK_FLAG)) {
+						System.out.println("GOT ACK "
+								+ received.getAcknowledgeNumber());
+						// React to ACK
+					} else {
+						// IF ACK field == -1 -> data packet
+						// -> add to queue and send ack
 
-					TransportPacket transportPacket = new TransportPacket(0,
-							received.getAcknowledgeNumber(),
-							TransportPacket.ACK_FLAG,
-							received.getStreamNumber(), new byte[0]);
-					//
-					transportPacket.setAcknowledgeNumber(received
-							.getAcknowledgeNumber());
-					//
-					System.out.println("SENDING ACK: "
-							+ received.getSequenceNumber());
-					System.out.print("ACK_PACK: ");
-					byte[] packetBytes = transportPacket.getBytes();
-					for (byte b : packetBytes) {
-						System.out.print(b);
+						TransportPacket transportPacket = new TransportPacket(
+								0, received.getAcknowledgeNumber(),
+								TransportPacket.ACK_FLAG,
+								received.getStreamNumber(), new byte[0]);
+						//
+						transportPacket.setAcknowledgeNumber(received
+								.getAcknowledgeNumber());
+						//
+						System.out.println("SENDING ACK: "
+								+ received.getSequenceNumber());
+						System.out.print("ACK_PACK: ");
+						byte[] packetBytes = transportPacket.getBytes();
+						for (byte b : packetBytes) {
+							System.out.print(b);
+						}
+						System.out.println("");
+						// queueSender.priorityPacket(transportPacket);
+						packetList.add(transportPacket);
+
+						// Set packet data
+
 					}
-					System.out.println("");
-					// queueSender.priorityPacket(transportPacket);
-					packetList.add(transportPacket);
-
-					// Set packet data
-
 				}
 			}
 		}
