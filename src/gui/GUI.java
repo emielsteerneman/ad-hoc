@@ -84,7 +84,6 @@ public class GUI extends JFrame{
 		
 		GridBagConstraints c = new GridBagConstraints();
 		Font font = new Font("Arial", Font.BOLD, 20);
-	//	backgroundColor = new Color(176,224,230);
 		
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
@@ -445,8 +444,5 @@ public class GUI extends JFrame{
 		frame.repaint();
 		frame.revalidate();
 		
-	}
-	public static void main(String[] args){
-			
 	}
 }
