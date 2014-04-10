@@ -58,6 +58,7 @@ public class NetworkDiscovery implements NetworkListener {
 		this.networkInterface = networkInterface;
 		this.identifier = identifier;
 		this.devices = new HashMap<>();
+		this.timeouts = new HashMap<>();
 		this.timer = new Timer();
 		this.timer.schedule(new BroadcastTask(), DELAY);
 	}
