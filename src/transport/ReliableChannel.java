@@ -146,9 +146,9 @@ public class ReliableChannel implements NetworkListener {
 					//
 
 					// System.out.println("");
-					if (expectedACK.size() > 0) {
+					if (currentWindow.size() > 0) {
 
-						if (sendIndex < expectedACK.size()) {
+						if (sendIndex < currentWindow.size()) {
 
 							NetworkPacket networkPacket = new NetworkPacket(
 									localAddress, address, (byte) 2,
@@ -157,10 +157,9 @@ public class ReliableChannel implements NetworkListener {
 							// Check whether ACK has been removed from the list
 							// of expected ACKS
 							if (expectedACK.contains(currentWindow.get(
-									sendIndex).getAcknowledgeNumber())) {
+									sendIndex).getAcknowledgeNumber()) || currentWindow.get(sendIndex).isFlagSet(TransportPacket.ACK_FLAG)) {
 								System.out.println("SEQ: "
-										+ currentWindow.get(sendIndex)
-												.getSequenceNumber());
+										+ currentWindow.get(sendIndex).getSequenceNumber()+ " | "+ currentWindow.get(sendIndex).getAcknowledgeNumber());
 								try {
 									networkInterface.send(networkPacket);
 
@@ -243,7 +242,7 @@ public class ReliableChannel implements NetworkListener {
 						// Set packet data
 						transportPacket.setStreamNumber(streamNumber);
 						transportPacket.setSequenceNumber(seqNumber);
-						transportPacket.setAcknowledgeNumber(seqNumber);
+//						transportPacket.setAcknowledgeNumber(seqNumber);
 						packetList.add(transportPacket);
 
 						dataPosition += MSS;
