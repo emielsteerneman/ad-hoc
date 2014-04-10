@@ -14,9 +14,13 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 	
 	@Override
 	public void rout(NetworkPacket networkPacket) throws IOException {
-		if (networkPacket.isFlagSet(NetworkPacket.ARP_FLAG)) {
-			networkInterface.process(networkPacket);
+		if (!networkPacket.isFlagSet(NetworkPacket.ARP_FLAG)) {
+			if (networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
+				networkInterface.process(networkPacket);
+			}
 			
+			
+			System.out.println(networkPacket.getSourceAddress());
 			//add stuff here
 		}
 		
