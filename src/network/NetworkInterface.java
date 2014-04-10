@@ -117,11 +117,15 @@ public class NetworkInterface extends Thread {
 
 		DatagramPacket packet = new DatagramPacket(packetData, packetData.length, group, port);
 		
+		System.out.println("send");
+		
 		sendSocket.send(packet);
 	}
 	
 	private synchronized void receive(DatagramPacket packet) throws IOException {
 		NetworkPacket networkPacket = NetworkPacket.parseBytes(packet.getData());
+		
+		
 		
 		if (networkPacket != null) {
 			routingProtocol.rout(networkPacket);
