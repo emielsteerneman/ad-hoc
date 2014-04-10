@@ -21,7 +21,7 @@ import network.NetworkListener;
 import network.NetworkPacket;
 
 public class ReliableChannel implements NetworkListener {
-	public static final int WNDSZ = 1;
+	public static final int WNDSZ = 5;
 	private static final int MSS = 5;
 	private InetAddress localAddress;
 	private InetAddress address;
@@ -298,7 +298,7 @@ public class ReliableChannel implements NetworkListener {
 					System.out.println("GOT ACK "
 							+ received.getAcknowledgeNumber());
 					// React to ACK
-				} else {
+				} else{
 					// IF ACK field == -1 -> data packet
 					// -> add to queue and send ack
 
@@ -307,7 +307,7 @@ public class ReliableChannel implements NetworkListener {
 							TransportPacket.ACK_FLAG,
 							received.getStreamNumber(), new byte[0]);
 					System.out.println("SENDING ACK: "
-							+ received.getAcknowledgeNumber());
+							+ received.getSequenceNumber());
 					// queueSender.priorityPacket(transportPacket);
 					packetList.add(transportPacket);
 
