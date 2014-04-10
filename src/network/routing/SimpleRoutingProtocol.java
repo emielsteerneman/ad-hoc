@@ -45,10 +45,8 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 				} else {
 					networkInterface.send(networkPacket);
 				}
-			}	
+			}
 		}
-		
-		//etc
 	}
 	
 }
