@@ -288,11 +288,16 @@ public class ReliableChannel implements NetworkListener {
 		// Check whether incoming packet is for local ip
 		System.out.println(address.toString() + " - "
 				+ packet.getSourceAddress().toString());
-		if (packet.getSourceAddress().equals(address)) {
+		if (packet.getSourceAddress().equals(address)&&packet.isFlagSet(NetworkPacket.TRANSPORT_FLAG)) {
 			System.out.println("HERE");
 			// Check whether packet is an ACK
 			TransportPacket received = TransportPacket.parseBytes(packet
 					.getData());
+			System.out.print("RECEIVED: ");
+			for(byte b : received.getBytes()){
+				System.out.print(b+" ");
+			}
+			System.out.println("");
 			if (received != null) {
 				if (received.isFlagSet(TransportPacket.ACK_FLAG)) {
 					System.out.println("GOT ACK "
@@ -308,6 +313,12 @@ public class ReliableChannel implements NetworkListener {
 							received.getStreamNumber(), new byte[0]);
 					System.out.println("SENDING ACK: "
 							+ received.getSequenceNumber());
+					System.out.print("ACK_PACK: ");
+					byte[] packetBytes = transportPacket.getBytes();
+					for(byte b: packetBytes){
+						System.out.print(b);
+					}
+					System.out.println("");
 					// queueSender.priorityPacket(transportPacket);
 					packetList.add(transportPacket);
 
