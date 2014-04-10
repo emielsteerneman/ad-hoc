@@ -153,7 +153,7 @@ public class ReliableChannel implements NetworkListener {
 							NetworkPacket networkPacket = new NetworkPacket(
 									localAddress, address, (byte) 2,
 									currentWindow.get(sendIndex).getBytes());
-
+							networkPacket.setFlags(NetworkPacket.TRANSPORT_FLAG);
 							// Check whether ACK has been removed from the list
 							// of expected ACKS
 							if (expectedACK.contains(currentWindow.get(
