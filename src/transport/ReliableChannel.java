@@ -13,13 +13,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import network.NetworkInterface;
 import network.NetworkListener;
 import network.NetworkPacket;
 
 public class ReliableChannel implements NetworkListener {
-	public static final int WNDSZ = 10;
+	public static final int WNDSZ = 1;
 	private static final int MSS = 5;
 	private InetAddress localAddress;
 	private InetAddress address;
@@ -32,6 +34,7 @@ public class ReliableChannel implements NetworkListener {
 	private PipedInputStream pipedIn;
 	private InputHandler inputHandler;
 	private QueueSender queueSender;
+	private Timer timer;
 	// QUEUE for important packets
 	private ArrayList<TransportPacket> packetList = new ArrayList<TransportPacket>();
 	// private ArrayList<TranportPacket>
@@ -54,15 +57,17 @@ public class ReliableChannel implements NetworkListener {
 		Thread t = (Thread) inputHandler;
 		t.start();
 		queueSender = new QueueSender(packetList);
-		Thread z = (Thread) queueSender;
-		z.start();
+		this.timer = new Timer();
+		long DELAY = 150;
+		this.timer.scheduleAtFixedRate(queueSender, DELAY, DELAY);
+//		this.timer.scheduleAtFixedRate(new ackSimulator(), DELAY*2, DELAY*2);
 
-		new ackSimulator().start();
+		
 	}
 
 	// Reads the queue of the channel and sends data in a windows. continues
 	// after every send packet is ack'ed
-	private class QueueSender extends Thread {
+	private class QueueSender extends TimerTask {
 		private ArrayList<TransportPacket> sendQueue;
 		private int currentStream;
 
@@ -119,9 +124,8 @@ public class ReliableChannel implements NetworkListener {
 		@Override
 		// TODO: ACK, set ack/seq numbers of transportPackets, priority packets
 		// (replace first packet in send queue)
-		public void run() {
-			while (true) {
-
+		public synchronized void run() {
+//			while (true) {
 				// Try sending as long as there are packets left to send
 				if (sendQueue.size() > 0 || expectedACK.size() > 0) {
 
@@ -192,18 +196,13 @@ public class ReliableChannel implements NetworkListener {
 
 								// DEBUG: remove first last entry from ACK list.
 								// expectedACK.remove(expectedACK.size() - 1);
-								System.out.println("");
+								System.out.println("--------------------");
 							}
 						}
 					}
 				}
-				try {
-					Thread.sleep(5);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+
+//			}
 
 		}
 
@@ -289,13 +288,13 @@ public class ReliableChannel implements NetworkListener {
 		// Check whether incoming packet is for local ip
 		System.out.println(address.toString() + " - "
 				+ packet.getSourceAddress().toString());
-		if (packet.getSourceAddress().equals(address)) {
+//		if (packet.getSourceAddress().equals(address)) {
 			System.out.println("HERE");
 			// Check whether packet is an ACK
 			TransportPacket received = TransportPacket.parseBytes(packet
-					.getBytes());
+					.getData());
 			if (received != null) {
-				if (received.getFlags() == TransportPacket.ACK_FLAG) {
+				if (received.isFlagSet(TransportPacket.ACK_FLAG)) {
 					System.out.println("GOT ACK "
 							+ received.getAcknowledgeNumber());
 					// React to ACK
@@ -316,27 +315,27 @@ public class ReliableChannel implements NetworkListener {
 
 				}
 			}
-		}
+//		}
 
 	}
 
-	public class ackSimulator extends Thread {
+	public class ackSimulator extends TimerTask {
 		@Override
-		public void run() {
-			while (true) {
+		public synchronized void run() {
+//			while (true) {
 				if (queueSender.expectedACK.size() > 0) {
+					System.out.print("EXP: ");
+					for(int i : queueSender.expectedACK){
+						System.out.print(i+",");
+					}
+					System.out.println();
 					TransportPacket pac = new TransportPacket(new byte[0]);
 					pac.setAcknowledgeNumber(queueSender.expectedACK.get(0));
 					onReceive(new NetworkPacket(address, localAddress, (byte)1, pac.getBytes()));
 //					queueSender.receivedACK(0, queueSender.expectedACK.get(0));
 				}
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+
+//			}
 		}
 	}
 	public static void main(String[] args) throws UnknownHostException, IOException{
