@@ -305,16 +305,16 @@ public class GUI extends JFrame{
 	  }
 	}
 		
-	
 	public void message(){
 		if(!b.getText().equals("")){
-		message(username +": " + b.getText());
+			message(username +": " + b.getText());
 		}
 	}
 	
 	public void message(String s){
+		ca.multicastSend(s);
 		a.append("\n" + s);
-		}
+	}
 	
 	public void connect() throws UnknownHostException, IOException{
 		message("Connecting to channel with username " + username + "...\n");

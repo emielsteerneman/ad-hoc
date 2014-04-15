@@ -77,4 +77,8 @@ public class ChatApp {
 	public void onMulticastReceive(String identifier, byte[] bytes){
 		gui.message(identifier + ": " + new String(bytes));
 	}
+	
+	public void multicastSend(String message){
+		network.getMulticastChannel().sendBytes(message.getBytes());
+	}
 }

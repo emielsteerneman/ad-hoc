@@ -73,6 +73,10 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 		return channels;
 	}
 	
+	public ReliableMulticastChannel getMulticastChannel(){
+		return multicastChannel;
+	}
+	
 	public Main(ChatApp ca) {
 		try{
 			chatapp = ca;
