@@ -117,7 +117,6 @@ public class WindowedChannel implements NetworkListener {
 			int index = 0;
 
 			if (currentWindow.size() == 0) {
-				System.out.print("FILLING : ");
 				while (currentWindow.size() < WNDSZ && packetList.size() > 0
 						&& index < packetList.size()) {
 
@@ -147,7 +146,6 @@ public class WindowedChannel implements NetworkListener {
 					}
 					index++;
 				}
-				System.out.println("");
 			}
 
 		}
@@ -200,12 +198,7 @@ public class WindowedChannel implements NetworkListener {
 										TransportPacket.ACK)) {
 
 							try {
-								if (!currentWindow.get(sendIndex).isFlagSet(
-										TransportPacket.ACK)) {
-									System.out.println("stream: "
-											+ currentWindow.get(sendIndex)
-													.getStreamNumber());
-								}
+
 								networkInterface.send(networkPacket);
 
 							} catch (IOException e) {
