@@ -6,11 +6,13 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import transport.unicast.ReliableChannelListener;
+
 import network.NetworkInterface;
 import network.discovery.NetworkDiscovery;
 import network.discovery.NetworkDiscoveryListener;
 
-public class Main implements NetworkDiscoveryListener {
+public class Main implements NetworkDiscoveryListener,ReliableMulticastChannelListener,ReliableChannelListener {
 	private HashMap<InetAddress, String> devices;
 
 	@Override
@@ -38,8 +40,11 @@ public class Main implements NetworkDiscoveryListener {
 		// 130.89.130.41
 		// 130.89.130.15
 		// 55555
+		
+		//MAX: "130.89.131.196"
+		//"10.89.227.144"
 		NetworkInterface networkInterface = new NetworkInterface(
-				InetAddress.getByName("130.89.169.104"), 55554, InetAddress.getLocalHost());
+				InetAddress.getByName(".............................."), 55554, InetAddress.getByName("................................"));
 		networkInterface.start();
 
 		NetworkDiscovery networkDiscovery = new NetworkDiscovery(
@@ -47,9 +52,10 @@ public class Main implements NetworkDiscoveryListener {
 		networkDiscovery.setNetworkDiscoveryListener(this);
 
 		networkInterface.addNetworkListener(networkDiscovery);
-
-		WindowedChannel channel = new WindowedChannel(InetAddress.getByName("130.89.169.104"), networkInterface);
-
+		
+		WindowedChannel channel = new WindowedChannel(InetAddress.getByName("....................."), networkInterface);
+		channel.addDeviceToChat(InetAddress.getByName("....................."));
+		channel.setReliableChannelListener(this);
 		networkInterface.addNetworkListener(channel);
 		Scanner user = new Scanner(System.in);
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -59,6 +65,7 @@ public class Main implements NetworkDiscoveryListener {
 			if (user.hasNextLine()) {
 				String text = user.nextLine();
 				if (text != null) {
+					System.out.println(text);
 					out.write(text);
 					out.newLine();
 
@@ -66,6 +73,19 @@ public class Main implements NetworkDiscoveryListener {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onReceive(InetAddress device, byte[] bytes) {
+		// TODO Auto-generated method stub
+		System.out.println("---> " +new String(bytes));
+		
+	}
+
+	@Override
+	public void onMulticastReceive(InetAddress device, byte[] bytes) {
+		// TODO Auto-generated method stub
+		System.out.println("---> "+ new String(bytes));
 	}
 
 }

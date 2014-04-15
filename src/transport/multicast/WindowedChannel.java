@@ -44,8 +44,8 @@ public class WindowedChannel implements NetworkListener {
 	private ArrayList<TransportPacket> packetList = new ArrayList<TransportPacket>();
 	private ArrayList<ArrayList<Byte>> tempFile = new ArrayList<ArrayList<Byte>>();
 	private ArrayList<HashMap<Integer, byte[]>> integerSequencemap = new ArrayList<HashMap<Integer, byte[]>>();
-	private ArrayList<Integer> packetCount;
-	private ArrayList<Byte> streamNumber;
+	private ArrayList<Integer> packetCount = new ArrayList<Integer>();
+	private ArrayList<Byte> streamNumber = new ArrayList<Byte>();
 
 	// private ArrayList<TranportPacket>
 
@@ -341,7 +341,7 @@ public class WindowedChannel implements NetworkListener {
 		openSequences.add(new ArrayList<Integer>());
 		tempFile.add(new ArrayList<Byte>());
 		integerSequencemap.add(new HashMap<Integer, byte[]>());
-		streamNumber.add((byte)-1);
+		streamNumber.add((byte)0);
 		packetCount.add(-1);
 
 	}
