@@ -267,9 +267,10 @@ public class WindowedChannel implements NetworkListener {
 					byte[] data = in.readLine().getBytes();
 					int dataPosition = 0;
 					if (data.length > 0) {
-
+						
 						ArrayList<TransportPacket> temp = new ArrayList<TransportPacket>();
 						while (data.length - dataPosition > MSS) {
+							
 							// System.out.println(data.length + ", " +
 							// dataPosition
 							// + " -- " + MSS);
@@ -287,6 +288,7 @@ public class WindowedChannel implements NetworkListener {
 
 							dataPosition += MSS;
 							seqNumber++;
+							System.out.println(seqNumber);
 						}
 						if (dataPosition < data.length) {
 							byte[] packetData = new byte[data.length
@@ -317,7 +319,7 @@ public class WindowedChannel implements NetworkListener {
 						//
 						seqNumber = 0;
 						streamCounter++;
-
+	
 					}
 				} catch (IOException e) {
 				}
@@ -338,6 +340,7 @@ public class WindowedChannel implements NetworkListener {
 		openSequences.add(new ArrayList<Integer>());
 		tempFile.add(new ArrayList<Byte>());
 		integerSequencemap.add(new HashMap<Integer, byte[]>());
+		
 
 	}
 
@@ -378,6 +381,7 @@ public class WindowedChannel implements NetworkListener {
 	@Override
 	public void onReceive(NetworkPacket packet) {
 		int workIndex = addressIndex.get(packet.getSourceAddress());
+		System.out.println(workIndex);
 		if (packet.isFlagSet(NetworkPacket.TRANSPORT) && workIndex > 0) {
 
 			TransportPacket received = TransportPacket.parseBytes(packet
