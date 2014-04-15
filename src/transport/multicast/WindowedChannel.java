@@ -39,7 +39,6 @@ public class WindowedChannel implements NetworkListener {
 	// private int packetCount;
 	private ReliableMulticastChannelListener listener;
 	private HashMap<InetAddress, Integer> addressIndex = new HashMap<InetAddress, Integer>();
-	private ArrayList<ArrayList<Integer>> openSequences = new ArrayList<ArrayList<Integer>>();
 	private ArrayList<TransportPacket> packetList = new ArrayList<TransportPacket>();
 	private ArrayList<ArrayList<Byte>> tempFile = new ArrayList<ArrayList<Byte>>();
 	private ArrayList<HashMap<Integer, byte[]>> integerSequencemap = new ArrayList<HashMap<Integer, byte[]>>();
@@ -352,7 +351,6 @@ public class WindowedChannel implements NetworkListener {
 	public void addDeviceToChat(InetAddress address) {
 		System.out.println("New device: " + address + " || " + tempFile.size());
 		this.addressIndex.put(address, tempFile.size());
-		openSequences.add(new ArrayList<Integer>());
 		tempFile.add(new ArrayList<Byte>());
 		integerSequencemap.add(new HashMap<Integer, byte[]>());
 		streamNumber.add((byte) 0);
@@ -395,7 +393,12 @@ public class WindowedChannel implements NetworkListener {
 		// System.out.println(new String(data));
 		System.out.println("currentfile size: " + bytes.size());
 	}
-
+	public void deviceTimeOut(InetAddress device){
+		if(addressIndex.containsKey(device)){
+			streamNumber.set(addressIndex.get(device), (byte)0);
+			tempFile.get(addressIndex.get(device)).clear();
+		}
+	}
 	@Override
 	public void onReceive(NetworkPacket packet) {
 		if (packet.isFlagSet(NetworkPacket.TRANSPORT)
@@ -461,7 +464,7 @@ public class WindowedChannel implements NetworkListener {
 							// integerSequencemap.get(workIndex).clear();
 							expectNewStream.set(workIndex, true);
 							byte t = (byte) (streamNumber.get(workIndex) + 1);
-							streamNumber.set(workIndex, t);
+//							streamNumber.set(workIndex, t);
 							System.out.println("FILE RECEIVED. NEXT STREAM: "
 									+ t);
 							// Set packet data
