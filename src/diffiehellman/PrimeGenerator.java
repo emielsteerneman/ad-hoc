@@ -12,13 +12,14 @@ public class PrimeGenerator {
 		int primeCounter = 0;
 		System.out.println("Calculating prime, please wait...");
 		while(true){
-			primeCounter++;
-			Random r = new Random();
-			long number = firstBound+((long)(r.nextDouble()*(secondBound-firstBound)));
+		primeCounter++;
+		Random r = new Random();
+		long number = firstBound+((long)(r.nextDouble()*(secondBound-firstBound)));
 			if(isPrime(number)){
 				System.out.println("Tries: " + primeCounter);
 				System.out.println("Prime found! :" + number);
-				return number;				
+				return number;
+				
 			}
 		}
 	}
@@ -26,11 +27,14 @@ public class PrimeGenerator {
 	
 	public static boolean isPrime(long number){
 		
-        for(int i = 2; i < Math.sqrt(number); i++){
-           if(number % i == 0){
+        for(int i=2; i<Math.sqrt(number); i++){
+           if(number%i == 0){
                return false; 
            }
-        }       
+        }
+       
         return true; 
     }
+
+
 }
