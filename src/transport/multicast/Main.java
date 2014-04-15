@@ -12,10 +12,10 @@ import network.NetworkInterface;
 import network.discovery.NetworkDiscovery;
 import network.discovery.NetworkDiscoveryListener;
 
-public class Main implements NetworkDiscoveryListener,ReliableMulticastChannelListener,ReliableChannelListener {
+public class Main implements ReliableMulticastChannelListener,ReliableChannelListener {
 	private HashMap<InetAddress, String> devices;
 
-	@Override
+	/*@Override
 	public void onDeviceDiscovery(InetAddress device, String identifier) {
 		devices.put(device, identifier);
 		
@@ -34,7 +34,7 @@ public class Main implements NetworkDiscoveryListener,ReliableMulticastChannelLi
 	public static void main(String[] args) throws IOException,
 			InterruptedException {
 		new Main();
-	}
+	}*/
 
 	public Main() throws IOException {
 		devices = new HashMap<>();
@@ -51,7 +51,7 @@ public class Main implements NetworkDiscoveryListener,ReliableMulticastChannelLi
 
 		NetworkDiscovery networkDiscovery = new NetworkDiscovery(
 				networkInterface, "yolo");
-		networkDiscovery.setNetworkDiscoveryListener(this);
+		//networkDiscovery.setNetworkDiscoveryListener(this);
 		
 		networkInterface.addNetworkListener(networkDiscovery);
 		
