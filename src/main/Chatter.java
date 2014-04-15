@@ -12,6 +12,7 @@ public class Chatter {
 	private InetAddress device;
 	private String identifier;
 	private ReliableChannel channel;
+	private long secretKey;
 	
 	public Chatter(InetAddress device, String identifier, ReliableChannel channel){
 		System.out.println("New chatter");
