@@ -52,6 +52,11 @@ public class Chatter {
 		}
 	}
 	
+	public void onDeviceTimeout(){
+		System.out.println("chatter " + identifier + " timed out, disposing...");
+		gui.dispose();
+	}
+	
 	public void send(String protocol, String message){
 		channel.sendBytes((protocol + " " + message).getBytes());
 	}

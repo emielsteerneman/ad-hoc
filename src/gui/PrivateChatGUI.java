@@ -208,36 +208,23 @@ public class PrivateChatGUI extends JFrame{
 	public void connect(String otherPerson) throws UnknownHostException, IOException{
 		message("Connecting to channel with username " + username + "...\n");
 		ca.connect();
-		//connect to the otha
-		//implement a connector to a channel
-		//upon connection..
-		
-		
 	}
 	
 	public void startPrivateChat(){
 			ca.startPrivateChat();
-			
 	}
 	
 	public void disconnect() throws IOException{
-		
 		ca.disconnect();
-		//close channel
-		
 	}
 	
 	public void send(String s) throws IOException{
-		
 		byte[] s1 = dhp.encrypt(s);
 		sh.send(s1);
-		
 	}
 	
 	public void receive(String s){
-		//String a = dhp.decrypt(s);
 		message(s);
-		
 	}
 	
 	public String representArrayList(ArrayList<String> al){

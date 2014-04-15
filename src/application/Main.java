@@ -54,6 +54,7 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 		networkInterface.removeNetworkListener(channels.get(device));
 		channels.remove(device);
 		identifiers.remove(device);
+		chatapp.onDeviceTimeout(device);
 	}
 	
 	@Override
@@ -65,6 +66,7 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 	@Override
 	public void onMulticastReceive(InetAddress device, byte[] bytes) {
 		System.out.println(device.toString() + ": " + new String(bytes));
+		chatapp.onMulticastReceive(identifiers.get(device), bytes);
 	}
 	
 	public HashMap<InetAddress, ReliableChannel> getChannels(){

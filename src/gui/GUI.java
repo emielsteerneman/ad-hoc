@@ -1,6 +1,4 @@
 package gui;
-
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -14,11 +12,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -34,12 +29,9 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-
 import main.ChatApp;
-import main.Chatter;
 import socket.SocketHandler;
 import diffiehellman.DiffieHellmanProtocol;
-
 public class GUI extends JFrame{
 	
 	/**
@@ -72,10 +64,8 @@ public class GUI extends JFrame{
 	private JComboBox<String> cb2;
 	private String[] sa;
 	private String[] COLOR = {"Red", "Blue", "Yellow", "Green"};
-	private boolean connect = false;
 	private Color backgroundColor = new Color(176,224,230);
 	private JFrame frame;
-
 	public GUI(String username, SocketHandler sh, ChatApp ca) {
 		this.sh = sh;
 		this.ca = ca;
@@ -100,16 +90,22 @@ public class GUI extends JFrame{
 		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new GridBagLayout());
 		buttonPanel.setBackground(backgroundColor);
+	
 		
-
-		
+		JButton btn1 = new JButton("Send");
+		btn1.setFont(font);
+		btn1.setPreferredSize(new Dimension(100, 30));
+		btn1.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				message();
+				b.setText("");
+			}
+		});
+		btn1.setVisible(true);
 		a = new JTextArea();
 		a.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		a.setMinimumSize(new Dimension(600,550));
-		a.setMaximumSize(new Dimension(600, 550));
-		a.setPreferredSize(new Dimension(600, 550));
 		a.setBackground(new Color(240,255,255));
-		
+				
 		JScrollPane scrollp = new JScrollPane(a);
 		scrollp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -118,13 +114,13 @@ public class GUI extends JFrame{
 		a.setEditable(false);
 		
 		b = new JTextArea();
+		b.setLayout(new GridBagLayout());
 		b.setBorder(new CompoundBorder(new MatteBorder(3,0,0,0,backgroundColor),(new EmptyBorder(5, 5, 0, 0))));
-		b.setMinimumSize(new Dimension(600,30));
-		b.setMaximumSize(new Dimension(600, 30));
-		b.setPreferredSize(new Dimension(600, 30));
+		b.setPreferredSize(new Dimension(500, 30));
 		
-
-		c.gridx = 0;
+		
+		
+		c.gridx = 1;
 		c.gridy = 0;
 		c.fill = c.BOTH;
 		c.weightx = 1;
@@ -132,10 +128,20 @@ public class GUI extends JFrame{
 		buttonPanel.add(scrollp,c);
 		
 		c.gridy = 1;
+		c.gridx = 1;
 		c.fill = c.HORIZONTAL;
-		c.weightx = 1;
+		c.weightx = 0.5;
 		c.weighty = 0;
 		buttonPanel.add(b,c);
+		
+		c.gridy = 1;
+		c.gridx = 2;
+		c.fill = c.NONE;
+		c.weightx = 0.5;
+		c.weighty = 0;
+		buttonPanel.add(btn1, c);
+		
+		
 		
 ////////menuPanel
 		menuPanel = new JPanel();
@@ -180,27 +186,7 @@ public class GUI extends JFrame{
 		inet.setText("Current InetAddress, needs to be implemented");//InetAddress.getLocalHost().getHostAddress());
 		menuPanel.add(inet);
 		
-	//port
-//		lbl = new JLabel("Port");
-//		lbl.setFont(font);
-//		menuPanel.add(lbl);
-//		
-//		port = new JTextField();
-//		port.setBorder(border);
-//		port.setFont(font);
-//		menuPanel.add(port);
-			 
-	//Send
-		btn = new JButton("Send");
-		btn.setFont(font);
-		menuPanel.add(btn);
-		btn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				message();
-				b.setText("");
-			}
-		});
-////////textPanel
+//		textPanel
 		textPanel = new JPanel();
 		textPanel.setLayout(new BorderLayout());
 		textPanel.setBorder(mborder);
@@ -208,19 +194,19 @@ public class GUI extends JFrame{
 		textPanel.setMinimumSize(new Dimension(300, 150));
 		textPanel.setMaximumSize(new Dimension(300, 150));
 		textPanel.setPreferredSize(new Dimension(300, 150));
-		
+				
 		textArea = new JTextArea();
 		textArea.setAlignmentY(TOP_ALIGNMENT);
 		
 		font = new Font("Arial", Font.PLAIN, 18);
 		textArea.setFont(font);
 		textArea.setText(representArrayList(connectedPeople));
+		textArea.setEditable(false);
 		
 		JScrollPane sp = new JScrollPane(textArea);
 		textPanel.add(sp, BorderLayout.CENTER);
 		
 		b.addKeyListener(new KeyListener(){
-
 			public void keyPressed(KeyEvent e){
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
 					e.consume();
@@ -277,7 +263,6 @@ public class GUI extends JFrame{
 			}
 		});
 		menuPanel.add(btn);		
-
 		//ADD ALL TO mainPanel
 		c.gridx = 1;
 		c.gridy = 0;
@@ -298,7 +283,6 @@ public class GUI extends JFrame{
 		c.weighty = 1;
 		c.weightx = 0;
 		mainPanel.add(menuPanel, c);
-
 		frame = new JFrame("GUI");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
@@ -307,12 +291,11 @@ public class GUI extends JFrame{
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 		
-		updateConnectedList();
+		
 	}
 	
 	class IndentedRenderer extends DefaultListCellRenderer
 	{
-
 	public Component getListCellRendererComponent(JList list,Object value,
 						  int index,boolean isSelected,boolean cellHasFocus)
 	  {
@@ -323,28 +306,39 @@ public class GUI extends JFrame{
 	}
 		
 	
-	public void message(){		
-		message(username + ": "+ b.getText());
+	public void message(){
+		if(!b.getText().equals("")){
+		message(username +": " + b.getText());
+		}
 	}
 	
 	public void message(String s){
 		a.append("\n" + s);
-	}
+		}
 	
 	public void connect() throws UnknownHostException, IOException{
 		message("Connecting to channel with username " + username + "...\n");
 		ca.connect();
+		//implement a connector to a channel
+		//upon connection..
+		
+		
 	}
 	
 	public void startPrivateChat(){
-			ca.startPrivateChat();			
+			ca.startPrivateChat();
+			
 	}
 	
-	public void disconnect() throws IOException{		
+	public void disconnect() throws IOException{
+		
 		ca.disconnect();
+		//close channel
+		
 	}
 	
 	public void send(String s) throws IOException{
+		
 		byte[] s1 = dhp.encrypt(s);
 		sh.send(s1);
 		
@@ -404,20 +398,6 @@ public class GUI extends JFrame{
 		frame.repaint();
 		
 	}
-	
-	
-	public void updateConnectedList(){
-		System.out.println("updating..");
-		for(int i = 0; i < 5; i++){
-			textArea.append("wer");
-			textPanel.add(new JButton("" + i));
-		}
-		textArea.revalidate();
-		textArea.repaint();
-		frame.pack();
-	}
-	
-	
 	
 	public static void main(String[] args){
 			new nicknameAsk();

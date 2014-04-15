@@ -63,10 +63,18 @@ public class ChatApp {
 	public void onDeviceDiscovery(InetAddress device, String identifier, ReliableChannel channel){
 		System.out.println("New device discovered");
 		chatters.put(device, new Chatter(device, identifier, channel));
-		
+	}
+	
+	public void onDeviceTimeout(InetAddress device){
+		chatters.get(device).onDeviceTimeout();
+		chatters.remove(device);
 	}
 	
 	public void onReceive(InetAddress device, byte[] bytes){
 		chatters.get(device).onReceive(bytes);
+	}
+	
+	public void onMulticastReceive(String identifier, byte[] bytes){
+		gui.message(identifier + ": " + new String(bytes));
 	}
 }
