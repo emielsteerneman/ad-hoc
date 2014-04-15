@@ -6,9 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -132,10 +136,73 @@ public class GroupChatView extends JPanel {
 	}
 	
 	public void addMessage(String identifier, String message) {
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		
+		StringBuffer sb = new StringBuffer();
+    	
+    	sb.append("[");
+    	sb.append(sdf.format(calendar.getTime()));
+    	sb.append("] ");
+    	
+    	sb.append("<font color=\"red\">");
+    	sb.append("&lt;");
+    	sb.append(identifier);
+    	sb.append("&gt;");
+    	sb.append("</font> ");
+    	
+    	sb.append(message);
+    	
 		try {
-			kit.insertHTML(doc, doc.getLength(), "<b>" + identifier + "</b>: " + message, 0, 0, null);
+			kit.insertHTML(doc, doc.getLength(), sb.toString(), 0, 0, null);
 		} catch (BadLocationException | IOException e) { }
 	}
+	
+	public void addDevice(NetworkDevice networkDevice) {
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		
+		StringBuffer sb = new StringBuffer();
+    	
+    	sb.append("<font color=\"green\">");
+    	
+    	sb.append("[");
+    	sb.append(sdf.format(calendar.getTime()));
+    	sb.append("] ");
+    	
+    	sb.append(" *** ");
+    	sb.append(networkDevice.getIdentifier());
+    	sb.append(" (");
+    	sb.append(networkDevice.getAddress());
+    	sb.append(") has joined</font>");
+    	
+    	try {
+			kit.insertHTML(doc, doc.getLength(), sb.toString(), 0, 0, null);
+		} catch (BadLocationException | IOException e) { }
+	}
+	
+	public void removeDevice(NetworkDevice networkDevice) {
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		
+		StringBuffer sb = new StringBuffer();
+    	
+    	sb.append("<font color=\"red\">");
+    	
+    	sb.append("[");
+    	sb.append(sdf.format(calendar.getTime()));
+    	sb.append("] ");
+    	
+    	sb.append(" *** ");
+    	sb.append(networkDevice.getIdentifier());
+    	sb.append(" (");
+    	sb.append(networkDevice.getAddress());
+    	sb.append(") has left</font>");
+    	
+    	try {
+			kit.insertHTML(doc, doc.getLength(), sb.toString(), 0, 0, null);
+		} catch (BadLocationException | IOException e) { }
+	}	
 	
 	public JTextField getInputTextField() {
 		return inputTextField;
