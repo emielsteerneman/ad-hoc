@@ -380,10 +380,10 @@ public class WindowedChannel implements NetworkListener {
 
 	@Override
 	public void onReceive(NetworkPacket packet) {
-		int workIndex = addressIndex.get(packet.getSourceAddress());
-		System.out.println(workIndex);
-		if (packet.isFlagSet(NetworkPacket.TRANSPORT) && workIndex > 0) {
 
+		if (packet.isFlagSet(NetworkPacket.TRANSPORT) && 
+				addressIndex.containsKey(packet.getSourceAddress())) {
+			int workIndex = addressIndex.get(packet.getSourceAddress());
 			TransportPacket received = TransportPacket.parseBytes(packet
 					.getData());
 			if (received != null) {
