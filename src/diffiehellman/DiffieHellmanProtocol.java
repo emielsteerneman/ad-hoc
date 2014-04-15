@@ -5,58 +5,36 @@ import java.util.Arrays;
 
 public class DiffieHellmanProtocol {
 
-	private long a = 6; // secret integer host A, kan random gemaakt
-								// worden.
-	private long b = 12; // secret integer host B, wordt door host B
-								// random gegenereerd.
+	private static long randomSecretInt = (long)(Math.random() * 1000);
 	private long s; // secret
-	private long p; // prime
-	private long g = 2; // grondgetal
-	private long A; // secret host A
-	private long B; // secret host B
+	private long prime; // prime
+	private static long ground = 2; // grondgetal
 	
 	public DiffieHellmanProtocol(){
-		generateOwnKey();
-		generateOtherKey();
-		generateKey();
+	
 	}
 
-	public long generateOwnKey() {
-		setP( PrimeGenerator.generatePrime());
-		System.out.println("Starting to calculate my own key..");
-		System.out.println("-------------------");
-		A = (long) (Math.pow(g, a) % p);
-		System.out.println("Key calculated!: " + A);
-		System.out.println("-------------------");
-		return A;
-	}
-	
-	private void setP(long a){
+	public static long generatePartialKey(long prime, int secretInt) {
+		//System.out.println("Starting to calculate my own key..");
+		//System.out.println("-------------------");
 		
-		p = a;
-	}
-	
-	private void setG(long b){
-		g = b;
-	}
-
-	public long generateOtherKey() {
-		System.out.println("Starting to calculate the other host's key...");
-		System.out.println("-------------------");
-		B = (long) (Math.pow(g, b) % p);
-		System.out.println("Key calculated!:" + B);
-		System.out.println("-------------------");
-		return B;
+		long key = (long) (Math.pow(ground, secretInt) % prime);
+		
+		//System.out.println("Key calculated!: " + key);
+		//System.out.println("-------------------");
+		
+		return key;
 	}
 
-	public long generateKey() {
-		System.out.println("Starting to calculate the secret key...");
-		System.out.println("-------------------");
-		s = (long) (Math.pow(B, a) % p);
-		System.out.println("Key calculated!: " + s);
-		System.out.println("-------------------");
+	public static long calculateSecretKey(long key, int secretInt, long prime) {
+		//System.out.println("Starting to calculate the secret key...");
+		//System.out.println("-------------------");
+		
+		return (long) (Math.pow(key, randomSecretInt) % prime);
+		
+		//System.out.println("Key calculated!: " + s);
+		//System.out.println("-------------------");
 
-		return s;
 	}
 
 	public byte[] encrypt(String message) {
@@ -75,18 +53,17 @@ public class DiffieHellmanProtocol {
 		return finalMessage;
 	}
 
-	public String decrypt(byte[] encryptedMessage) {
-		byte[] secretKey = getByteValue(s);
+	public static String decrypt(byte[] encryptedMessage, long key) {
+		byte[] secretKey = getByteValue(key);
 		System.out.println(secretKey.toString());
 		byte[] message = XOR(encryptedMessage, secretKey);
 		String finalMessage = new String(message);
 		System.out.println("Decrypting message ...");
 		System.out.println("Decrypted message: " + finalMessage);
 		return finalMessage;
-
 	}
 
-	public byte[] XOR(byte[] message, byte[] secretKey) {
+	public static byte[] XOR(byte[] message, byte[] secretKey) {
 		System.out.println("XOR Test...");
 		System.out.println(Arrays.toString(message));
 		System.out.println(Arrays.toString(secretKey));
@@ -99,7 +76,7 @@ public class DiffieHellmanProtocol {
 		return finalMessage;
 	}
 
-	public byte[] getByteValue(long x) {
+	public static byte[] getByteValue(long x) {
 		ByteBuffer buffer = ByteBuffer.allocate(8);
 		buffer.putLong(x);
 		return buffer.array();

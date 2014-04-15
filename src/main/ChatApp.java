@@ -44,7 +44,7 @@ public class ChatApp {
 		gui.message("Disconnecting from channel...\n");
 		//implement a disconnector to a channel
 		//upon connection..
-		sh.terminate();
+		sh.terminate(); 
 		gui.message("Disconnected"); 
 		connect = false;
 		} else {
@@ -53,8 +53,7 @@ public class ChatApp {
 	}
 	
 	public void startPrivateChat(){
-		gui.message("Starting private chat");
-		new PrivateChatGUI("Emiel");		
+		gui.message("Starting private chat");	
 	}
 	
 	public static void main(String args[]){
@@ -67,4 +66,7 @@ public class ChatApp {
 		
 	}
 	
+	public void onReceive(InetAddress device, byte[] bytes){
+		chatters.get(device).onReceive(bytes);
+	}
 }

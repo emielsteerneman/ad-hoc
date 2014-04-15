@@ -14,8 +14,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -34,6 +36,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
 import main.ChatApp;
+import main.Chatter;
 import socket.SocketHandler;
 import diffiehellman.DiffieHellmanProtocol;
 
@@ -304,7 +307,7 @@ public class GUI extends JFrame{
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 		
-		
+		updateConnectedList();
 	}
 	
 	class IndentedRenderer extends DefaultListCellRenderer
@@ -320,51 +323,28 @@ public class GUI extends JFrame{
 	}
 		
 	
-	public void message(){
-		if(connect == true){
-	String newMessage = username +": " + b.getText();
-	String finalSendMessage = a.getText() + "\n" +  newMessage;
-	a.setText(finalSendMessage);
-	message(newMessage);
-		} else {
-			message("You are not connected to this channel.");
-		}
-		//Connect to other sockets, send message
-	
-	
+	public void message(){		
+		message(username + ": "+ b.getText());
 	}
 	
-	//system send
 	public void message(String s){
-		String finalField = a.getText() + "\n" + s;
-		a.setText(finalField);
-		}
+		a.append("\n" + s);
+	}
 	
 	public void connect() throws UnknownHostException, IOException{
 		message("Connecting to channel with username " + username + "...\n");
 		ca.connect();
-		//implement a connector to a channel
-		//upon connection..
-		
-		
 	}
 	
 	public void startPrivateChat(){
-			ca.startPrivateChat();
-			
+			ca.startPrivateChat();			
 	}
 	
-	public void disconnect() throws IOException{
-		
+	public void disconnect() throws IOException{		
 		ca.disconnect();
-
-		//close channel
-
-		
 	}
 	
 	public void send(String s) throws IOException{
-		
 		byte[] s1 = dhp.encrypt(s);
 		sh.send(s1);
 		
@@ -424,6 +404,20 @@ public class GUI extends JFrame{
 		frame.repaint();
 		
 	}
+	
+	
+	public void updateConnectedList(){
+		System.out.println("updating..");
+		for(int i = 0; i < 5; i++){
+			textArea.append("wer");
+			textPanel.add(new JButton("" + i));
+		}
+		textArea.revalidate();
+		textArea.repaint();
+		frame.pack();
+	}
+	
+	
 	
 	public static void main(String[] args){
 			new nicknameAsk();

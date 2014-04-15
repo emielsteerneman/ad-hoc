@@ -58,6 +58,7 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 	
 	@Override
 	public void onReceive(InetAddress device, byte[] bytes) {
+		chatapp.onReceive(device, bytes);
 		System.out.println(device.toString() + ": " + new String(bytes));
 	}
 	

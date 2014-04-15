@@ -1,6 +1,4 @@
 package gui;
-
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -28,10 +26,11 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
+import network.Protocol;
 import main.ChatApp;
+import main.Chatter;
 import socket.SocketHandler;
 import diffiehellman.DiffieHellmanProtocol;
-
 public class PrivateChatGUI extends JFrame{
 	
 	/**
@@ -63,16 +62,14 @@ public class PrivateChatGUI extends JFrame{
 	private Color backgroundColor = new Color(176,224,230);
 	private JFrame frame;
 	
-
-	public PrivateChatGUI(String otherUser) {
+	private Chatter chatter;
+	
+	public PrivateChatGUI(String otherUser, Chatter chatter) {
 		//connect to other user
-		this.sh = sh;
-		this.ca = ca;
 		connectedPeople = new ArrayList<String>();
 		connectedPeople.add(otherUser);
-
 		
-		this.username = username;
+		this.chatter = chatter;
 		
 		GridBagConstraints c = new GridBagConstraints();
 		Font font = new Font("Arial", Font.BOLD, 20);
@@ -111,7 +108,6 @@ public class PrivateChatGUI extends JFrame{
 		b.setMaximumSize(new Dimension(600, 30));
 		b.setPreferredSize(new Dimension(600, 30));
 		
-
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = c.BOTH;
@@ -157,11 +153,10 @@ public class PrivateChatGUI extends JFrame{
 		textPanel.add(sp, BorderLayout.CENTER);
 		
 		b.addKeyListener(new KeyListener(){
-
 			public void keyPressed(KeyEvent e){
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
 					e.consume();
-					message();
+					message(username + ": " + b.getText());
 					b.setText("");
 				}
 			}
@@ -184,7 +179,6 @@ public class PrivateChatGUI extends JFrame{
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		mainPanel.add(textPanel, c);
-
 		frame = new JFrame("GUI");
 		frame.setLayout(new BorderLayout());
 		frame.add(mainPanel);
@@ -197,7 +191,6 @@ public class PrivateChatGUI extends JFrame{
 	
 	class IndentedRenderer extends DefaultListCellRenderer
 	{
-
 	public Component getListCellRendererComponent(JList list,Object value,
 						  int index,boolean isSelected,boolean cellHasFocus)
 	  {
@@ -207,22 +200,10 @@ public class PrivateChatGUI extends JFrame{
 	  }
 	}
 		
-	
-	public void message(){
-	String newMessage = username +": " + b.getText();
-	String finalSendMessage = a.getText() + "\n" +  newMessage;
-	a.setText(finalSendMessage);
-		
-		//Connect to other sockets, send message
-	
-	
-	}
-	
-	//system send
 	public void message(String s){
-		String finalField = a.getText() + "\n" + s;
-		a.setText(finalField);
-		}
+		chatter.send(Protocol.MESSAGE, s);
+		a.append("\n" + s);
+	}
 	
 	public void connect(String otherPerson) throws UnknownHostException, IOException{
 		message("Connecting to channel with username " + username + "...\n");
@@ -242,9 +223,7 @@ public class PrivateChatGUI extends JFrame{
 	public void disconnect() throws IOException{
 		
 		ca.disconnect();
-
 		//close channel
-
 		
 	}
 	
@@ -285,7 +264,4 @@ public class PrivateChatGUI extends JFrame{
 		return username;
 	}
 	
-	public static void main(String[] args){
-		new PrivateChatGUI("Kees");
-	}
 }
