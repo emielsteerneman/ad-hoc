@@ -26,7 +26,7 @@ public class MainView extends JPanel {
 	private JTabbedPane chatsPane;
 	private JSplitPane splitPane;
 	
-	private PrivateChatView groupChatTab;
+	private GroupChatView groupChatTab;
 	private HashMap<NetworkDevice, PrivateChatView> privateChatTabs;
 	
 	private String identifier;
@@ -53,7 +53,7 @@ public class MainView extends JPanel {
 		
 		setLayout(new BorderLayout());
 		
-		groupChatTab = new PrivateChatView(identifier, null);
+		groupChatTab = new GroupChatView(identifier, null);
 		privateChatTabs = new HashMap<>();
 		
 		chatsPane = new JTabbedPane();
@@ -76,7 +76,7 @@ public class MainView extends JPanel {
 		add(splitPane, BorderLayout.CENTER);
 	}
 	
-	public PrivateChatView getGroupChatTab() {
+	public GroupChatView getGroupChatTab() {
 		return groupChatTab;
 	}
 	
