@@ -83,6 +83,8 @@ public class NetworkInterface extends Thread {
 			
 			try {
 				receiveSocket.receive(packet);
+				
+				System.out.println("receive");
 			} catch (IOException e) {
 				packet = null;
 			}

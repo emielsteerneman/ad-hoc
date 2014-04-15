@@ -15,17 +15,22 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 	@Override
 	public void rout(NetworkPacket networkPacket) throws IOException {
 		if (networkPacket.isFlagSet(NetworkPacket.ARP)) {
-			//if (!networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
+			if (!networkPacket.getSourceAddress().equals(networkInterface.getLocalHost())) {
 				networkInterface.process(networkPacket);
 				
 				if (networkPacket.getHopcount() > 0) {
 					networkPacket.decrementHopcount();
 					networkInterface.send(networkPacket);
 				}
-			//}
+			} else {
+				if (networkPacket.getHopcount() > 0) {
+					networkPacket.decrementHopcount();
+					networkInterface.send(networkPacket);
+				}
+			}
 			
 			return;
-		} 
+		}
 		
 		if (networkPacket.isFlagSet(NetworkPacket.TRANSPORT)) {
 			if (!networkPacket.getDestinationAddresses().contains(networkInterface.getLocalHost())) {
@@ -36,8 +41,6 @@ public class SimpleRoutingProtocol implements RoutingProtocol {
 				if (networkPacket.getHopcount() > 0) {
 					networkPacket.decrementHopcount();
 					networkInterface.send(networkPacket);
-				} else {
-					return;
 				}
 			} else {
 				if (networkPacket.getHopcount() >= 0) {					

@@ -13,7 +13,7 @@ import transport.unicast.ReliableChannel;
 import transport.unicast.ReliableChannelListener;
 
 
-public class Main implements ReliableChannelListener, ReliableMulticastChannelListener, NetworkDiscoveryListener {
+public class ChatClient implements ReliableChannelListener, ReliableMulticastChannelListener, NetworkDiscoveryListener {
 	private HashMap<InetAddress, ReliableChannel> channels;
 	private HashMap<InetAddress, String> identifiers;
 	
@@ -23,7 +23,7 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 	private NetworkDiscovery networkDiscovery;
 	
 	private InetAddress group;
-	private int port = 55555;
+	private int port = 6666;
 	
 	@Override
 	public void onDeviceDiscovery(InetAddress device, String identifier) {
@@ -62,12 +62,12 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 		System.out.println(device.toString() + ": " + new String(bytes));
 	}
 	
-	public Main() throws IOException {
+	public ChatClient() throws IOException {
 		channels = new HashMap<>();
 		identifiers = new HashMap<>();
-		group = InetAddress.getByName("192.168.0.115");
+		group = InetAddress.getByName("130.89.131.196");
 		
-		networkInterface = new NetworkInterface(group, port, InetAddress.getByName("192.168.0.115"));
+		networkInterface = new NetworkInterface(group, port, InetAddress.getByName("130.89.227.144"));
 		networkInterface.start();
 		
 		multicastChannel = new ReliableMulticastChannel(networkInterface);
@@ -80,7 +80,7 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 	}
 	
 	public static void main(String[] args) throws IOException {
-		new Main();
+		new ChatClient();
 	}
 	
 }
