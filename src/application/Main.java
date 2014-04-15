@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
 
+import main.ChatApp;
 import network.NetworkInterface;
 import network.discovery.NetworkDiscovery;
 import network.discovery.NetworkDiscoveryListener;
-import transport.multicast.ReliableMulticastChannelListener;
 import transport.multicast.ReliableMulticastChannel;
+import transport.multicast.ReliableMulticastChannelListener;
 import transport.unicast.ReliableChannel;
 import transport.unicast.ReliableChannelListener;
 
@@ -25,6 +26,8 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 	private InetAddress group;
 	private int port = 55555;
 	
+	private ChatApp chatapp;
+	
 	@Override
 	public void onDeviceDiscovery(InetAddress device, String identifier) {
 		ReliableChannel channel = null;
@@ -40,6 +43,7 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 			channels.put(device, channel);
 			identifiers.put(device, identifier);
 			networkInterface.addNetworkListener(channel);
+			chatapp.onDeviceDiscovery(device, identifier, channel);
 		}
 		
 		System.out.println(device + ": " + identifier);
@@ -62,25 +66,30 @@ public class Main implements ReliableChannelListener, ReliableMulticastChannelLi
 		System.out.println(device.toString() + ": " + new String(bytes));
 	}
 	
-	public Main() throws IOException {
-		channels = new HashMap<>();
-		identifiers = new HashMap<>();
-		group = InetAddress.getByName("192.168.0.115");
-		
-		networkInterface = new NetworkInterface(group, port, InetAddress.getByName("192.168.0.115"));
-		networkInterface.start();
-		
-		multicastChannel = new ReliableMulticastChannel(networkInterface);
-		multicastChannel.start();
-		networkInterface.addNetworkListener(multicastChannel);
-		
-		networkDiscovery = new NetworkDiscovery(networkInterface, "kappa");
-		networkDiscovery.setNetworkDiscoveryListener(this);
-		networkInterface.addNetworkListener(networkDiscovery);
+	public HashMap<InetAddress, ReliableChannel> getChannels(){
+		return channels;
 	}
 	
-	public static void main(String[] args) throws IOException {
-		new Main();
+	public Main(ChatApp ca) {
+		try{
+			chatapp = ca;
+			channels = new HashMap<>();
+			identifiers = new HashMap<>();
+			group = InetAddress.getByName("192.168.0.115");
+			
+			networkInterface = new NetworkInterface(group, port, InetAddress.getByName("192.168.0.115"));
+			networkInterface.start();
+			
+			multicastChannel = new ReliableMulticastChannel(networkInterface);
+			multicastChannel.start();
+			networkInterface.addNetworkListener(multicastChannel);
+			
+			networkDiscovery = new NetworkDiscovery(networkInterface, "kappa");
+			networkDiscovery.setNetworkDiscoveryListener(this);
+			networkInterface.addNetworkListener(networkDiscovery);
+		}catch(IOException e){
+			System.out.println("Error in initializing application.Main()");
+			System.out.println(e.getMessage());
+		}
 	}
-	
 }

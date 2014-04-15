@@ -458,10 +458,8 @@ public class GUI extends JFrame{
 		frame.repaint();
 		
 	}
+	
 	public static void main(String[] args){
 			new nicknameAsk();
-	}
-	
-	
-	
+	}	
 }

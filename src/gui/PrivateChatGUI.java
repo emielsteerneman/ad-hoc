@@ -64,7 +64,7 @@ public class PrivateChatGUI extends JFrame{
 	private JFrame frame;
 	
 
-	public PrivateChatGUI(String username, SocketHandler sh, ChatApp ca, String otherUser) {
+	public PrivateChatGUI(String otherUser) {
 		//connect to other user
 		this.sh = sh;
 		this.ca = ca;
@@ -180,7 +180,6 @@ public class PrivateChatGUI extends JFrame{
 		mainPanel.add(textPanel, c);
 
 		frame = new JFrame("GUI");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
 		frame.add(mainPanel);
 		frame.pack();
@@ -281,9 +280,6 @@ public class PrivateChatGUI extends JFrame{
 	}
 	
 	public static void main(String[] args){
-		new PrivateChatGUI("Bas", sh, ca, "Kees");
+		new PrivateChatGUI("Kees");
 	}
-	
-	
-	
 }

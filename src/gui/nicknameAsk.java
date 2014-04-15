@@ -97,8 +97,4 @@ public class nicknameAsk {
 	
 		
 	}
-	
-	public static void main(String[] argv){
-		new nicknameAsk();
-			}
 }
