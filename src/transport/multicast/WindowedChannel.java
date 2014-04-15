@@ -341,6 +341,8 @@ public class WindowedChannel implements NetworkListener {
 		openSequences.add(new ArrayList<Integer>());
 		tempFile.add(new ArrayList<Byte>());
 		integerSequencemap.add(new HashMap<Integer, byte[]>());
+		streamNumber.add((byte)-1);
+		packetCount.add(-1);
 
 	}
 
@@ -380,11 +382,9 @@ public class WindowedChannel implements NetworkListener {
 
 	@Override
 	public void onReceive(NetworkPacket packet) {
-		if (!packet.getSourceAddress().equals(networkInterface.getLocalHost())) {
-			System.out.println(packet.getSourceAddress());
-		}
 		if (packet.isFlagSet(NetworkPacket.TRANSPORT)
 				&& addressIndex.containsKey(packet.getSourceAddress())) {
+			System.out.println("SUP");
 			int workIndex = addressIndex.get(packet.getSourceAddress());
 			TransportPacket received = TransportPacket.parseBytes(packet
 					.getData());
@@ -443,7 +443,7 @@ public class WindowedChannel implements NetworkListener {
 								parseFile(workIndex, tempFile.get(workIndex)));
 						tempFile.get(workIndex).clear();
 						expectNewStream = true;
-						byte t = streamNumber.get(workIndex);
+						byte t = (byte)(streamNumber.get(workIndex)+1);
 						streamNumber.set(workIndex, t);
 
 						// Set packet data
