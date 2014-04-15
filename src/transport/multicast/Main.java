@@ -18,7 +18,9 @@ public class Main implements NetworkDiscoveryListener,ReliableMulticastChannelLi
 	@Override
 	public void onDeviceDiscovery(InetAddress device, String identifier) {
 		devices.put(device, identifier);
-
+		
+		System.out.println(device + ": " + identifier);
+		
 		System.out.println(devices);
 	}
 
@@ -44,17 +46,17 @@ public class Main implements NetworkDiscoveryListener,ReliableMulticastChannelLi
 		//MAX: "130.89.131.196"
 		//"10.89.227.144"
 		NetworkInterface networkInterface = new NetworkInterface(
-				InetAddress.getByName(".............................."), 55554, InetAddress.getByName("................................"));
+				InetAddress.getByName("130.89.131.196"), 55554, InetAddress.getByName("130.89.227.144"));
 		networkInterface.start();
 
 		NetworkDiscovery networkDiscovery = new NetworkDiscovery(
 				networkInterface, "yolo");
 		networkDiscovery.setNetworkDiscoveryListener(this);
-
+		
 		networkInterface.addNetworkListener(networkDiscovery);
 		
-		WindowedChannel channel = new WindowedChannel(InetAddress.getByName("....................."), networkInterface);
-		channel.addDeviceToChat(InetAddress.getByName("....................."));
+		WindowedChannel channel = new WindowedChannel(InetAddress.getByName("130.89.131.196"), networkInterface);
+		channel.addDeviceToChat(InetAddress.getByName("130.89.131.196"));
 		channel.setReliableChannelListener(this);
 		networkInterface.addNetworkListener(channel);
 		Scanner user = new Scanner(System.in);
@@ -65,7 +67,7 @@ public class Main implements NetworkDiscoveryListener,ReliableMulticastChannelLi
 			if (user.hasNextLine()) {
 				String text = user.nextLine();
 				if (text != null) {
-					System.out.println(text);
+					//System.out.println(text);
 					out.write(text);
 					out.newLine();
 
