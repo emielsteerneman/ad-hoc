@@ -115,13 +115,16 @@ public class WindowedChannel implements NetworkListener {
 		 */
 		private void fillWindow() {
 			int index = 0;
+
 			if (currentWindow.size() == 0) {
+				System.out.print("FILLING : ");
 				while (currentWindow.size() < WNDSZ && packetList.size() > 0
 						&& index < packetList.size()) {
 
 					TransportPacket t = null;
 					// fill expectedACK with next seqs
 					t = packetList.get(index);
+					System.out.print(t.getStreamNumber());
 					// Check whether packet has same stream number
 					if (t.getStreamNumber() != this.currentStream) {
 
@@ -144,6 +147,7 @@ public class WindowedChannel implements NetworkListener {
 					}
 					index++;
 				}
+				System.out.println("");
 			}
 
 		}
@@ -180,9 +184,10 @@ public class WindowedChannel implements NetworkListener {
 					if (sendIndex < currentWindow.size()) {
 
 						NetworkPacket networkPacket = new NetworkPacket(
-								networkInterface.getLocalHost(), new ArrayList<InetAddress>(addressIndex.keySet()),
-								(byte) 2, currentWindow.get(sendIndex)
-										.getBytes());
+								networkInterface.getLocalHost(),
+								new ArrayList<InetAddress>(addressIndex
+										.keySet()), (byte) 2,
+								currentWindow.get(sendIndex).getBytes());
 						networkPacket.setFlags(NetworkPacket.TRANSPORT);
 
 						// Check whether ACK has been removed from the list
@@ -195,7 +200,12 @@ public class WindowedChannel implements NetworkListener {
 										TransportPacket.ACK)) {
 
 							try {
-								System.out.println(currentWindow.get(sendIndex).getSequenceNumber());
+								if (!currentWindow.get(sendIndex).isFlagSet(
+										TransportPacket.ACK)) {
+									System.out.println("stream: "
+											+ currentWindow.get(sendIndex)
+													.getStreamNumber());
+								}
 								networkInterface.send(networkPacket);
 
 							} catch (IOException e) {
@@ -246,6 +256,7 @@ public class WindowedChannel implements NetworkListener {
 
 			int index = expectedACK.indexOf(ack);
 			if (index > -1) {
+				System.out.println("RECEIVED ACK: "+ack);
 				expectedACK.remove(index);
 			}
 
@@ -256,7 +267,7 @@ public class WindowedChannel implements NetworkListener {
 	private class InputHandler extends Thread {
 		BufferedReader in;
 		int seqNumber;
-		byte streamCounter;
+		byte streamCounter = 0;
 
 		public InputHandler(InputStream in) {
 			this.in = new BufferedReader(new InputStreamReader(in));
@@ -306,7 +317,8 @@ public class WindowedChannel implements NetworkListener {
 							transportPacket.setSequenceNumber(seqNumber);
 							transportPacket.setAcknowledgeNumber(seqNumber);
 							temp.add(transportPacket);
-
+							System.out.println("---> "
+									+ transportPacket.getStreamNumber());
 						}
 						// SET FLAG for last packet in list to mark end of file
 
@@ -338,12 +350,12 @@ public class WindowedChannel implements NetworkListener {
 	}
 
 	public void addDeviceToChat(InetAddress address) {
-		System.out.println("New device: "+address+" || "+tempFile.size());
+		System.out.println("New device: " + address + " || " + tempFile.size());
 		this.addressIndex.put(address, tempFile.size());
 		openSequences.add(new ArrayList<Integer>());
 		tempFile.add(new ArrayList<Byte>());
 		integerSequencemap.add(new HashMap<Integer, byte[]>());
-		streamNumber.add((byte)0);
+		streamNumber.add((byte) 0);
 		packetCount.add(-1);
 
 	}
@@ -416,11 +428,12 @@ public class WindowedChannel implements NetworkListener {
 					if (expectNewStream) {
 
 						integerSequencemap.get(workIndex).clear();
-
+						this.streamNumber.set(workIndex, received.getStreamNumber());
 						expectNewStream = false;
 						packetCountKnow = false;
 					}
-
+					// System.out.println("streamNumbers: "
+					// +received.getStreamNumber()+" - - "+streamNumber.get(workIndex));
 					if (received.getStreamNumber() == this.streamNumber
 							.get(workIndex)
 							&& !integerSequencemap.get(workIndex).containsKey(
@@ -443,10 +456,11 @@ public class WindowedChannel implements NetworkListener {
 						listener.onMulticastReceive(packet.getSourceAddress(),
 								parseFile(workIndex, tempFile.get(workIndex)));
 						tempFile.get(workIndex).clear();
+						// integerSequencemap.get(workIndex).clear();
 						expectNewStream = true;
-						byte t = (byte)(streamNumber.get(workIndex)+1);
+						byte t = (byte) (streamNumber.get(workIndex) + 1);
 						streamNumber.set(workIndex, t);
-
+						System.out.println("FILE RECEIVED. NEXT STREAM: " + t);
 						// Set packet data
 						// Add received data to temporary file
 
