@@ -180,8 +180,9 @@ public class WindowedChannel implements NetworkListener {
 					if (sendIndex < currentWindow.size()) {
 
 						NetworkPacket networkPacket = new NetworkPacket(
-								networkInterface.getLocalHost(), address, (byte) 2, currentWindow
-										.get(sendIndex).getBytes());
+								networkInterface.getLocalHost(), new ArrayList<InetAddress>(addressIndex.keySet()),
+								(byte) 2, currentWindow.get(sendIndex)
+										.getBytes());
 						networkPacket.setFlags(NetworkPacket.TRANSPORT);
 
 						// Check whether ACK has been removed from the list
@@ -267,10 +268,10 @@ public class WindowedChannel implements NetworkListener {
 					byte[] data = in.readLine().getBytes();
 					int dataPosition = 0;
 					if (data.length > 0) {
-						
+
 						ArrayList<TransportPacket> temp = new ArrayList<TransportPacket>();
 						while (data.length - dataPosition > MSS) {
-							
+
 							// System.out.println(data.length + ", " +
 							// dataPosition
 							// + " -- " + MSS);
@@ -319,7 +320,7 @@ public class WindowedChannel implements NetworkListener {
 						//
 						seqNumber = 0;
 						streamCounter++;
-	
+
 					}
 				} catch (IOException e) {
 				}
@@ -340,7 +341,6 @@ public class WindowedChannel implements NetworkListener {
 		openSequences.add(new ArrayList<Integer>());
 		tempFile.add(new ArrayList<Byte>());
 		integerSequencemap.add(new HashMap<Integer, byte[]>());
-		
 
 	}
 
@@ -380,9 +380,11 @@ public class WindowedChannel implements NetworkListener {
 
 	@Override
 	public void onReceive(NetworkPacket packet) {
-
-		if (packet.isFlagSet(NetworkPacket.TRANSPORT) && 
-				addressIndex.containsKey(packet.getSourceAddress())) {
+		if (!packet.getSourceAddress().equals(networkInterface.getLocalHost())) {
+			System.out.println(packet.getSourceAddress());
+		}
+		if (packet.isFlagSet(NetworkPacket.TRANSPORT)
+				&& addressIndex.containsKey(packet.getSourceAddress())) {
 			int workIndex = addressIndex.get(packet.getSourceAddress());
 			TransportPacket received = TransportPacket.parseBytes(packet
 					.getData());
