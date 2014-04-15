@@ -1,6 +1,5 @@
 package application.view;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -27,8 +26,10 @@ public class MainView extends JPanel {
 	private JTabbedPane chatsPane;
 	private JSplitPane splitPane;
 	
-	private ChatView groupChatTab;
-	private HashMap<NetworkDevice, ChatView> privateChatTabs;
+	private PrivateChatView groupChatTab;
+	private HashMap<NetworkDevice, PrivateChatView> privateChatTabs;
+	
+	private String identifier;
 	
 	private class DeviceListSelectionListener extends MouseAdapter {
 		@Override
@@ -37,9 +38,9 @@ public class MainView extends JPanel {
 				NetworkDevice device = deviceList.getSelectedValue();
 				
 				if (!privateChatTabs.containsKey(device)) {
-					ChatView privateChatView = new ChatView();
+					PrivateChatView privateChatView = new PrivateChatView(identifier, device);
 					
-					privateChatTabs.put(deviceList.getSelectedValue(), new ChatView());
+					privateChatTabs.put(deviceList.getSelectedValue(), new PrivateChatView(identifier, device));
 					
 					chatsPane.addTab(device.toString(), privateChatView);
 				}
@@ -47,10 +48,12 @@ public class MainView extends JPanel {
 		}
 	}
 	
-	public MainView() {
+	public MainView(String identifier) {
+		this.identifier = identifier;
+		
 		setLayout(new BorderLayout());
 		
-		groupChatTab = new ChatView();
+		groupChatTab = new PrivateChatView(identifier, null);
 		privateChatTabs = new HashMap<>();
 		
 		chatsPane = new JTabbedPane();
@@ -60,17 +63,7 @@ public class MainView extends JPanel {
 		deviceListModel = new DefaultListModel<>();
 		
 		deviceList = new JList<>(deviceListModel);
-		deviceList.setCellRenderer(new DefaultListCellRenderer() {
-			private static final long serialVersionUID = 1L;
-
-			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                    boolean isSelected, boolean cellHasFocus) {
-				
-                setText(((NetworkDevice) value).getIdentifier());
-                
-                return this;
-            }
-        });
+		deviceList.setCellRenderer(new DefaultListCellRenderer());
 		deviceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		deviceList.addMouseListener(new DeviceListSelectionListener());
 		
@@ -79,20 +72,24 @@ public class MainView extends JPanel {
 		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, chatsPane, scrollPane);
 		splitPane.setResizeWeight(1.0);
-		splitPane.setDividerLocation(splitPane.getSize().width
-                - splitPane.getInsets().right
-                - splitPane.getDividerSize()
-                - 200);
 		
 		add(splitPane, BorderLayout.CENTER);
 	}
 	
-	public ChatView getGroupChatTab() {
+	public PrivateChatView getGroupChatTab() {
 		return groupChatTab;
 	}
 	
-	public HashMap<NetworkDevice, ChatView> getPrivateChatTabs() {
+	public HashMap<NetworkDevice, PrivateChatView> getPrivateChatTabs() {
 		return privateChatTabs;
+	}
+	
+	public void addNetworkDevice(NetworkDevice networkDevice) {
+		deviceListModel.addElement(networkDevice);
+	}
+	
+	public void removeNetworkDevice(NetworkDevice networkDevice) {
+		deviceListModel.removeElement(networkDevice);
 	}
 	
 }

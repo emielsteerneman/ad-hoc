@@ -21,11 +21,16 @@ import javax.swing.text.DefaultCaret;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import network.NetworkDevice;
 
-public class ChatView extends JPanel {
+
+public class PrivateChatView extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private final JFileChooser fileChooser;
+	
+	private String identifier;
+	private NetworkDevice networkDevice;
 	
 	private JEditorPane textArea;
 	private HTMLEditorKit kit;
@@ -43,7 +48,7 @@ public class ChatView extends JPanel {
 			inputTextField.setText("");
 			
 			if (message.length() > 0) {
-				addMessage("adsfasdf", message);
+				addMessage(identifier, message);
 			}
 		}
 		
@@ -69,14 +74,17 @@ public class ChatView extends JPanel {
 	            if (data.length > 0) {
 	            	System.out.println(Arrays.toString(data));
 	            	
-	            	addMessage("yolo", new String(data));
+	            	addMessage(identifier, new String(data));
 	            }
 	        }
 		}
 		
 	}
 	
-	public ChatView() {
+	public PrivateChatView(String identifier, NetworkDevice networkDevice) {
+		this.identifier = identifier;
+		this.networkDevice = networkDevice;
+		
 		setLayout(new BorderLayout());
 		
 		fileChooser = new JFileChooser();

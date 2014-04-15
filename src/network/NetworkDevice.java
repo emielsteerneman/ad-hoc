@@ -21,7 +21,12 @@ public class NetworkDevice {
 	
 	@Override
 	public String toString() {
-		return "[" + address.toString() + ": " + identifier + "]";
+		return identifier;
+	}
+
+	@Override
+	public int hashCode() {
+		return address.hashCode();
 	}
 
 	@Override
@@ -34,7 +39,7 @@ public class NetworkDevice {
             return false;
         
         NetworkDevice networkDevice = (NetworkDevice) obj;
-		
+        
 		return address.equals(networkDevice.getAddress());
 	}
 	

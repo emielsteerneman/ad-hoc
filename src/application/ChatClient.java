@@ -27,9 +27,11 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 	private NetworkInterface networkInterface;
 	private NetworkDiscovery networkDiscovery;
 	
-	private String localHost = "1.0.0.0.";
-	private String group = "1.0.0.0.";
+	private String localHost = "192.168.0.115";
+	private String group = "192.168.0.115";
 	private int port = 6666;
+	
+	private String identifier;
 	
 	private MainView mainView;
 	
@@ -49,13 +51,14 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 			networkInterface.addNetworkListener(channel);
 		}
 		
-		System.out.println(networkDevice);
+		mainView.addNetworkDevice(networkDevice);
 	}
 
 	@Override
 	public void onDeviceTimeout(NetworkDevice networkDevice) {
 		networkInterface.removeNetworkListener(channels.get(networkDevice));
 		channels.remove(networkDevice);
+		mainView.removeNetworkDevice(networkDevice);
 	}
 	
 	@Override
@@ -68,8 +71,10 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 		System.out.println(device.toString() + ": " + new String(bytes));
 	}
 	
-	public ChatClient() throws IOException {
-		mainView = new MainView();
+	public ChatClient(String identifier) throws IOException {
+		this.identifier = identifier;
+		
+		mainView = new MainView(identifier);
 		
 		JFrame frame = new JFrame("Ad hoc chat");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -86,7 +91,7 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 		multicastChannel.start();
 		networkInterface.addNetworkListener(multicastChannel);
 		
-		networkDiscovery = new NetworkDiscovery(networkInterface, "kappa");
+		networkDiscovery = new NetworkDiscovery(networkInterface, identifier);
 		networkDiscovery.setNetworkDiscoveryListener(this);
 		networkInterface.addNetworkListener(networkDiscovery);
 	}
@@ -96,7 +101,9 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) { }
 		
-		new ChatClient();
+//		String alias = JOptionPane.showInputDialog(null, "Enter an alias");
+
+		new ChatClient("Aede");
 	}
 	
 }
