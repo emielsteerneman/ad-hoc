@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
@@ -97,9 +98,7 @@ public class GUI extends JFrame{
 		buttonPanel.setLayout(new GridBagLayout());
 		buttonPanel.setBackground(backgroundColor);
 		
-		buttonPanel.setMinimumSize(new Dimension(600, 600));
-		buttonPanel.setMaximumSize(new Dimension(600, 600));
-		buttonPanel.setPreferredSize(new Dimension(600, 600));
+
 		
 		a = new JTextArea();
 		a.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -107,6 +106,11 @@ public class GUI extends JFrame{
 		a.setMaximumSize(new Dimension(600, 550));
 		a.setPreferredSize(new Dimension(600, 550));
 		a.setBackground(new Color(240,255,255));
+		
+		JScrollPane scrollp = new JScrollPane(a);
+		scrollp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollp.setPreferredSize(new Dimension(600,500));
 		
 		a.setEditable(false);
 		
@@ -122,7 +126,7 @@ public class GUI extends JFrame{
 		c.fill = c.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
-		buttonPanel.add(a,c);
+		buttonPanel.add(scrollp,c);
 		
 		c.gridy = 1;
 		c.fill = c.HORIZONTAL;
@@ -182,44 +186,6 @@ public class GUI extends JFrame{
 //		port.setBorder(border);
 //		port.setFont(font);
 //		menuPanel.add(port);
-	
-	//Connect
-		btn = new JButton("Connect");
-		btn.setFont(font);
-		menuPanel.add(btn);
-		btn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				try {
-					connect();
-				} catch (IOException e1) {
-					message("Could not connect");
-					e1.printStackTrace();
-				}
-			}
-
-			
-		});
-	
-
-		
-	//Disconnect
-		btn = new JButton("Disconnect");
-		btn.setFont(font);
-		menuPanel.add(btn);
-		
-		btn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				try {
-					disconnect();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-
-	
-		
 			 
 	//Send
 		btn = new JButton("Send");

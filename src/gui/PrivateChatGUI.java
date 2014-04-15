@@ -17,13 +17,13 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
@@ -88,9 +88,9 @@ public class PrivateChatGUI extends JFrame{
 		buttonPanel.setLayout(new GridBagLayout());
 		buttonPanel.setBackground(Color.BLACK);
 		
-		buttonPanel.setMinimumSize(new Dimension(600, 600));
-		buttonPanel.setMaximumSize(new Dimension(600, 600));
-		buttonPanel.setPreferredSize(new Dimension(600, 600));
+//		buttonPanel.setMinimumSize(new Dimension(600, 600));
+//		buttonPanel.setMaximumSize(new Dimension(600, 600));
+//		buttonPanel.setPreferredSize(new Dimension(600, 600));
 		
 		a = new JTextArea();
 		a.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -99,6 +99,10 @@ public class PrivateChatGUI extends JFrame{
 		a.setPreferredSize(new Dimension(600, 550));
 		a.setBackground(new Color(240,255,255));
 		
+		JScrollPane scrollp = new JScrollPane(a);
+		scrollp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollp.setPreferredSize(new Dimension(600,500));
 		a.setEditable(false);
 		
 		b = new JTextArea();
@@ -113,7 +117,7 @@ public class PrivateChatGUI extends JFrame{
 		c.fill = c.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
-		buttonPanel.add(a,c);
+		buttonPanel.add(scrollp,c);
 		
 		c.gridy = 1;
 		c.fill = c.HORIZONTAL;
@@ -137,9 +141,9 @@ public class PrivateChatGUI extends JFrame{
 		textPanel.setLayout(new BorderLayout());
 		textPanel.setBorder(mborder);
 		textPanel.setBackground(backgroundColor);
-		textPanel.setMinimumSize(new Dimension(300, 150));
-		textPanel.setMaximumSize(new Dimension(300, 150));
-		textPanel.setPreferredSize(new Dimension(300, 150));
+		textPanel.setMinimumSize(new Dimension(300, 50));
+		textPanel.setMaximumSize(new Dimension(300, 50));
+		textPanel.setPreferredSize(new Dimension(300, 50));
 		
 		textArea = new JTextArea();
 		textArea.setAlignmentY(TOP_ALIGNMENT);
@@ -149,6 +153,7 @@ public class PrivateChatGUI extends JFrame{
 		textArea.setText(representArrayList(connectedPeople));
 		
 		JScrollPane sp = new JScrollPane(textArea);
+		sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		textPanel.add(sp, BorderLayout.CENTER);
 		
 		b.addKeyListener(new KeyListener(){
@@ -166,17 +171,18 @@ public class PrivateChatGUI extends JFrame{
 		
 		
 		//ADD ALL TO mainPanel
-		c.gridx = 1;
-		c.gridy = 0;
+		c.gridx = 0;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
 		mainPanel.add(buttonPanel, c);
 		
-		c.gridx = 2;
+		c.gridx = 0;
+		c.gridy = 0;
 		c.weighty = 1;
 		c.weightx = 0;
-		c.fill = GridBagConstraints.VERTICAL;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		mainPanel.add(textPanel, c);
 
 		frame = new JFrame("GUI");
