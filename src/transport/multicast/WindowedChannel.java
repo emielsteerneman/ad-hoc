@@ -35,8 +35,7 @@ public class WindowedChannel implements NetworkListener {
 	private QueueSender queueSender;
 	private Timer timer;
 	// QUEUE for important packets
-	private boolean expectNewStream = true;
-	private boolean packetCountKnow = false;
+
 	// private int packetCount;
 	private ReliableMulticastChannelListener listener;
 	private HashMap<InetAddress, Integer> addressIndex = new HashMap<InetAddress, Integer>();
@@ -46,6 +45,8 @@ public class WindowedChannel implements NetworkListener {
 	private ArrayList<HashMap<Integer, byte[]>> integerSequencemap = new ArrayList<HashMap<Integer, byte[]>>();
 	private ArrayList<Integer> packetCount = new ArrayList<Integer>();
 	private ArrayList<Byte> streamNumber = new ArrayList<Byte>();
+	private ArrayList<Boolean> expectNewStream = new ArrayList<Boolean>();
+	private ArrayList<Boolean> packetCountKnow = new ArrayList<Boolean>();
 
 	// private ArrayList<TranportPacket>
 
@@ -124,7 +125,7 @@ public class WindowedChannel implements NetworkListener {
 					TransportPacket t = null;
 					// fill expectedACK with next seqs
 					t = packetList.get(index);
-					System.out.print(t.getStreamNumber());
+
 					// Check whether packet has same stream number
 					if (t.getStreamNumber() != this.currentStream) {
 
@@ -256,7 +257,7 @@ public class WindowedChannel implements NetworkListener {
 
 			int index = expectedACK.indexOf(ack);
 			if (index > -1) {
-				System.out.println("RECEIVED ACK: "+ack);
+				System.out.println("RECEIVED ACK: " + ack);
 				expectedACK.remove(index);
 			}
 
@@ -317,8 +318,7 @@ public class WindowedChannel implements NetworkListener {
 							transportPacket.setSequenceNumber(seqNumber);
 							transportPacket.setAcknowledgeNumber(seqNumber);
 							temp.add(transportPacket);
-							System.out.println("---> "
-									+ transportPacket.getStreamNumber());
+
 						}
 						// SET FLAG for last packet in list to mark end of file
 
@@ -357,6 +357,8 @@ public class WindowedChannel implements NetworkListener {
 		integerSequencemap.add(new HashMap<Integer, byte[]>());
 		streamNumber.add((byte) 0);
 		packetCount.add(-1);
+		expectNewStream.add(true);
+		packetCountKnow.add(false);
 
 	}
 
@@ -425,50 +427,51 @@ public class WindowedChannel implements NetworkListener {
 					// queueSender.priorityPacket(transportPacket);
 					// packetList.add(transportPacket);
 					queueSender.priorityPacket(transportPacket);
-					if (expectNewStream) {
-
+					if (expectNewStream.get(workIndex)) {
+						System.out.println("NEW STREAM EXPECTED");
 						integerSequencemap.get(workIndex).clear();
-						this.streamNumber.set(workIndex, received.getStreamNumber());
-						expectNewStream = false;
-						packetCountKnow = false;
+//						this.streamNumber.set(workIndex,
+//								received.getStreamNumber());
+						expectNewStream.set(workIndex, false);
+						packetCountKnow.set(workIndex, false);
 					}
-					// System.out.println("streamNumbers: "
-					// +received.getStreamNumber()+" - - "+streamNumber.get(workIndex));
 					if (received.getStreamNumber() == this.streamNumber
-							.get(workIndex)
-							&& !integerSequencemap.get(workIndex).containsKey(
-									seq)) {
+							.get(workIndex)) {
+						if (!integerSequencemap.get(workIndex).containsKey(seq)) {
 
-						integerSequencemap.get(workIndex).put(seq,
-								received.getData());
-						if (received.isFlagSet(TransportPacket.FRAGMENTED)) {
-							packetCountKnow = true;
-							packetCount.set(workIndex, seq + 1);
+							integerSequencemap.get(workIndex).put(seq,
+									received.getData());
+							if (received.isFlagSet(TransportPacket.FRAGMENTED)) {
+								packetCountKnow.set(workIndex, true);
+								packetCount.set(workIndex, seq + 1);
+
+							}
+							// System.out.println("Received :"+seq);
 
 						}
-						// System.out.println("Received :"+seq);
 
-					}
+						if (packetCountKnow.get(workIndex)
+								&& integerSequencemap.get(workIndex).size() == packetCount
+										.get(workIndex)) {
+							listener.onMulticastReceive(
+									packet.getSourceAddress(),
+									parseFile(workIndex,
+											tempFile.get(workIndex)));
+							tempFile.get(workIndex).clear();
+							// integerSequencemap.get(workIndex).clear();
+							expectNewStream.set(workIndex, true);
+							byte t = (byte) (streamNumber.get(workIndex) + 1);
+							streamNumber.set(workIndex, t);
+							System.out.println("FILE RECEIVED. NEXT STREAM: "
+									+ t);
+							// Set packet data
+							// Add received data to temporary file
 
-					if (packetCountKnow
-							&& integerSequencemap.get(workIndex).size() == packetCount
-									.get(workIndex)) {
-						listener.onMulticastReceive(packet.getSourceAddress(),
-								parseFile(workIndex, tempFile.get(workIndex)));
-						tempFile.get(workIndex).clear();
-						// integerSequencemap.get(workIndex).clear();
-						expectNewStream = true;
-						byte t = (byte) (streamNumber.get(workIndex) + 1);
-						streamNumber.set(workIndex, t);
-						System.out.println("FILE RECEIVED. NEXT STREAM: " + t);
-						// Set packet data
-						// Add received data to temporary file
-
+						}
 					}
 				}
+				// }
 			}
-			// }
-
 		}
 	}
 
