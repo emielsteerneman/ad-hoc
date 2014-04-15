@@ -9,6 +9,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 
@@ -22,6 +24,7 @@ public class MainView extends JPanel {
 	private JList<NetworkDevice> deviceList;
 	private JScrollPane scrollPane;
 	private JTabbedPane chatsPane;
+	private JSplitPane splitPane;
 	
 	private ChatView groupChatTab;
 	private HashMap<NetworkDevice, ChatView> privateChatTabs;
@@ -51,8 +54,7 @@ public class MainView extends JPanel {
 		
 		chatsPane = new JTabbedPane();
 		chatsPane.addTab("Groupchat", groupChatTab);
-		
-		add(chatsPane, BorderLayout.CENTER);
+		chatsPane.setMinimumSize(new Dimension(400, 0));
 		
 		deviceListModel = new DefaultListModel<>();
 		
@@ -61,9 +63,16 @@ public class MainView extends JPanel {
 		deviceList.addMouseListener(new DeviceListSelectionListener());
 		
 		scrollPane = new JScrollPane(deviceList);
-		scrollPane.setPreferredSize(new Dimension(200, 0));
+		scrollPane.setMinimumSize(new Dimension(100, 0));
 		
-		add(scrollPane, BorderLayout.EAST);
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, chatsPane, scrollPane);
+		splitPane.setResizeWeight(1.0);
+		splitPane.setDividerLocation(splitPane.getSize().width
+                - splitPane.getInsets().right
+                - splitPane.getDividerSize()
+                - 200);
+		
+		add(splitPane, BorderLayout.CENTER);
 	}
 	
 	public ChatView getGroupChatTab() {
