@@ -195,6 +195,7 @@ public class WindowedChannel implements NetworkListener {
 										TransportPacket.ACK)) {
 
 							try {
+								System.out.println(currentWindow.get(sendIndex).getSequenceNumber());
 								networkInterface.send(networkPacket);
 
 							} catch (IOException e) {
@@ -337,6 +338,7 @@ public class WindowedChannel implements NetworkListener {
 	}
 
 	public void addDeviceToChat(InetAddress address) {
+		System.out.println("New device: "+address+" || "+tempFile.size());
 		this.addressIndex.put(address, tempFile.size());
 		openSequences.add(new ArrayList<Integer>());
 		tempFile.add(new ArrayList<Byte>());
@@ -384,7 +386,6 @@ public class WindowedChannel implements NetworkListener {
 	public void onReceive(NetworkPacket packet) {
 		if (packet.isFlagSet(NetworkPacket.TRANSPORT)
 				&& addressIndex.containsKey(packet.getSourceAddress())) {
-			System.out.println("SUP");
 			int workIndex = addressIndex.get(packet.getSourceAddress());
 			TransportPacket received = TransportPacket.parseBytes(packet
 					.getData());
