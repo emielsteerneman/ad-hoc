@@ -44,8 +44,7 @@ public class MainView extends JPanel {
 	}
 	
 	public MainView() {
-		super(new BorderLayout());
-		setMinimumSize(new Dimension(600, 480));
+		setLayout(new BorderLayout());
 		
 		groupChatTab = new ChatView();
 		privateChatTabs = new HashMap<>();
@@ -56,20 +55,13 @@ public class MainView extends JPanel {
 		add(chatsPane, BorderLayout.CENTER);
 		
 		deviceListModel = new DefaultListModel<>();
+		
 		deviceList = new JList<>(deviceListModel);
 		deviceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		deviceList.addMouseListener(new DeviceListSelectionListener());
+		
 		scrollPane = new JScrollPane(deviceList);
 		scrollPane.setPreferredSize(new Dimension(200, 0));
-		
-		deviceListModel.addElement(new NetworkDevice());
-		deviceListModel.addElement(new NetworkDevice());
-		deviceListModel.addElement(new NetworkDevice());
-		deviceListModel.addElement(new NetworkDevice());
-		deviceListModel.addElement(new NetworkDevice());
-		deviceListModel.addElement(new NetworkDevice());
-		deviceListModel.addElement(new NetworkDevice());
-		deviceListModel.addElement(new NetworkDevice());
 		
 		add(scrollPane, BorderLayout.EAST);
 	}

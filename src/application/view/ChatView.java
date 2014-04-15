@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
@@ -78,7 +77,7 @@ public class ChatView extends JPanel {
 	}
 	
 	public ChatView() {
-		super(new BorderLayout());
+		setLayout(new BorderLayout());
 		
 		fileChooser = new JFileChooser();
 		

@@ -1,16 +1,21 @@
 package application;
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
 
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+
 import network.NetworkInterface;
 import network.discovery.NetworkDiscovery;
 import network.discovery.NetworkDiscoveryListener;
-import transport.multicast.ReliableMulticastChannelListener;
 import transport.multicast.ReliableMulticastChannel;
+import transport.multicast.ReliableMulticastChannelListener;
 import transport.unicast.ReliableChannel;
 import transport.unicast.ReliableChannelListener;
+import application.view.MainView;
 
 
 public class ChatClient implements ReliableChannelListener, ReliableMulticastChannelListener, NetworkDiscoveryListener {
@@ -22,8 +27,11 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 	private NetworkInterface networkInterface;
 	private NetworkDiscovery networkDiscovery;
 	
-	private InetAddress group;
+	private String localHost = "####.####.####.####";
+	private String group = "####.####.####.####";
 	private int port = 6666;
+	
+	private MainView mainView;
 	
 	@Override
 	public void onDeviceDiscovery(InetAddress device, String identifier) {
@@ -63,11 +71,18 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 	}
 	
 	public ChatClient() throws IOException {
+		mainView = new MainView();
+		
+		JFrame frame = new JFrame("Ad hoc chat");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setMinimumSize(new Dimension(600, 480));
+		frame.setVisible(true);
+		frame.add(mainView);
+		
 		channels = new HashMap<>();
 		identifiers = new HashMap<>();
-		group = InetAddress.getByName("130.89.131.196");
 		
-		networkInterface = new NetworkInterface(group, port, InetAddress.getByName("130.89.227.144"));
+		networkInterface = new NetworkInterface(InetAddress.getByName(group), port, InetAddress.getByName(localHost));
 		networkInterface.start();
 		
 		multicastChannel = new ReliableMulticastChannel(networkInterface);
@@ -80,6 +95,10 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 	}
 	
 	public static void main(String[] args) throws IOException {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) { }
+		
 		new ChatClient();
 	}
 	
