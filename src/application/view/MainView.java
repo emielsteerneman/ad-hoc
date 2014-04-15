@@ -1,15 +1,16 @@
 package application.view;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
@@ -59,6 +60,17 @@ public class MainView extends JPanel {
 		deviceListModel = new DefaultListModel<>();
 		
 		deviceList = new JList<>(deviceListModel);
+		deviceList.setCellRenderer(new DefaultListCellRenderer() {
+			private static final long serialVersionUID = 1L;
+
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+				
+                setText(((NetworkDevice) value).getIdentifier());
+                
+                return this;
+            }
+        });
 		deviceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		deviceList.addMouseListener(new DeviceListSelectionListener());
 		

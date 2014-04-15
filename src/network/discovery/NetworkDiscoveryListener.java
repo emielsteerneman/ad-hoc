@@ -1,8 +1,8 @@
 package network.discovery;
 
-import java.net.InetAddress;
+import network.NetworkDevice;
 
 public interface NetworkDiscoveryListener {
-	public void onDeviceDiscovery(InetAddress device, String identifier);
-	public void onDeviceTimeout(InetAddress device);
+	public void onDeviceDiscovery(NetworkDevice networkDevice);
+	public void onDeviceTimeout(NetworkDevice networkDevice);
 }

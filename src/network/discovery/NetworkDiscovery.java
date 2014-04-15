@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import network.NetworkDevice;
 import network.NetworkInterface;
 import network.NetworkListener;
 import network.NetworkPacket;
@@ -18,8 +19,7 @@ public class NetworkDiscovery implements NetworkListener {
 	private NetworkInterface networkInterface;
 	private String identifier;
 	
-	private HashMap<InetAddress, String> devices;
-	private HashMap<InetAddress, Integer> timeouts;
+	private HashMap<NetworkDevice, Integer> devices;
 	
 	private NetworkDiscoveryListener networkDiscoveryListener = null;
 	
@@ -32,14 +32,13 @@ public class NetworkDiscovery implements NetworkListener {
 			NetworkPacket networkPacket = new NetworkPacket(networkInterface.getLocalHost(), new ArrayList<InetAddress>(), NetworkInterface.HOPCOUNT, identifier.getBytes());
 			networkPacket.setFlags(NetworkPacket.ARP);
 			
-			for (InetAddress device : devices.keySet()) {
-				int TTL = timeouts.get(device) - 1;
+			for (NetworkDevice device : devices.keySet()) {
+				int TTL = devices.get(device) - 1;
 				
 				if (TTL > 0) {
-					timeouts.put(device, TTL);
+					devices.put(device, TTL);
 				} else {
 					devices.remove(device);
-					timeouts.remove(device);
 					
 					if (networkDiscoveryListener != null) {
 						networkDiscoveryListener.onDeviceTimeout(device);
@@ -58,7 +57,6 @@ public class NetworkDiscovery implements NetworkListener {
 		this.networkInterface = networkInterface;
 		this.identifier = identifier;
 		this.devices = new HashMap<>();
-		this.timeouts = new HashMap<>();
 		this.timer = new Timer();
 		this.timer.scheduleAtFixedRate(new BroadcastTask(), 0L, DELAY);
 	}
@@ -69,17 +67,15 @@ public class NetworkDiscovery implements NetworkListener {
 			return;
 		}
 		
-		if (devices.containsKey(packet.getSourceAddress())) {
-			timeouts.put(packet.getSourceAddress(), NetworkDiscovery.TIMEOUT);
+		NetworkDevice networkDevice = new NetworkDevice(packet.getSourceAddress(), new String(packet.getData()));
+		
+		if (devices.containsKey(networkDevice)) {
+			devices.put(networkDevice, NetworkDiscovery.TIMEOUT);
 		} else {
-			InetAddress device = packet.getSourceAddress();
-			String identifier = new String(packet.getData());
-			
-			devices.put(device, identifier);
-			timeouts.put(device, NetworkDiscovery.TIMEOUT);
+			devices.put(networkDevice, NetworkDiscovery.TIMEOUT);
 			
 			if (networkDiscoveryListener != null) {
-				networkDiscoveryListener.onDeviceDiscovery(device, identifier);
+				networkDiscoveryListener.onDeviceDiscovery(networkDevice);
 			}
 		}
 	}

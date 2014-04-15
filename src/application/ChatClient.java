@@ -8,6 +8,7 @@ import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
+import network.NetworkDevice;
 import network.NetworkInterface;
 import network.discovery.NetworkDiscovery;
 import network.discovery.NetworkDiscoveryListener;
@@ -19,45 +20,42 @@ import application.view.MainView;
 
 
 public class ChatClient implements ReliableChannelListener, ReliableMulticastChannelListener, NetworkDiscoveryListener {
-	private HashMap<InetAddress, ReliableChannel> channels;
-	private HashMap<InetAddress, String> identifiers;
+	private HashMap<NetworkDevice, ReliableChannel> channels;
 	
 	private ReliableMulticastChannel multicastChannel;
 	
 	private NetworkInterface networkInterface;
 	private NetworkDiscovery networkDiscovery;
 	
-	private String localHost = "####.####.####.####";
-	private String group = "####.####.####.####";
+	private String localHost = "1.0.0.0.";
+	private String group = "1.0.0.0.";
 	private int port = 6666;
 	
 	private MainView mainView;
 	
 	@Override
-	public void onDeviceDiscovery(InetAddress device, String identifier) {
+	public void onDeviceDiscovery(NetworkDevice networkDevice) {
 		ReliableChannel channel = null;
 		
 		try {
-			 channel = new ReliableChannel(device, networkInterface);
+			 channel = new ReliableChannel(networkDevice.getAddress(), networkInterface);
 		} catch (IOException e) { }
 		
 		if (channel != null) {
 			channel.setReliableChannelListener(this);
 			channel.start();
 			
-			channels.put(device, channel);
-			identifiers.put(device, identifier);
+			channels.put(networkDevice, channel);
 			networkInterface.addNetworkListener(channel);
 		}
 		
-		System.out.println(device + ": " + identifier);
+		System.out.println(networkDevice);
 	}
 
 	@Override
-	public void onDeviceTimeout(InetAddress device) {
-		networkInterface.removeNetworkListener(channels.get(device));
-		channels.remove(device);
-		identifiers.remove(device);
+	public void onDeviceTimeout(NetworkDevice networkDevice) {
+		networkInterface.removeNetworkListener(channels.get(networkDevice));
+		channels.remove(networkDevice);
 	}
 	
 	@Override
@@ -80,7 +78,6 @@ public class ChatClient implements ReliableChannelListener, ReliableMulticastCha
 		frame.add(mainView);
 		
 		channels = new HashMap<>();
-		identifiers = new HashMap<>();
 		
 		networkInterface = new NetworkInterface(InetAddress.getByName(group), port, InetAddress.getByName(localHost));
 		networkInterface.start();
