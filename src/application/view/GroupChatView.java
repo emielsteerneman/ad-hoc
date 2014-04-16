@@ -202,4 +202,8 @@ public class GroupChatView extends JPanel {
 		} catch (BadLocationException | IOException e) { }
 	}
 	
+	public void setGroupChatViewListener(GroupChatViewListener listener) {
+		this.listener = listener;
+	}
+	
 }

@@ -62,6 +62,7 @@ public class MainView extends JPanel {
 		setLayout(new BorderLayout());
 		
 		groupChatTab = new GroupChatView(identifier);
+		groupChatTab.setGroupChatViewListener(client);
 		privateChatTabs = new HashMap<>();
 		
 		chatsPane = new JTabbedPane();

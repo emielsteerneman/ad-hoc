@@ -16,18 +16,19 @@ import network.NetworkDevice;
 import network.NetworkInterface;
 import network.discovery.NetworkDiscovery;
 import network.discovery.NetworkDiscoveryListener;
-import transport.multicast.ReliableMulticastChannel;
 import transport.multicast.ReliableMulticastChannelListener;
+import transport.multicast.WindowedChannel;
 import transport.unicast.ReliableChannel;
 import transport.unicast.ReliableChannelListener;
+import application.view.GroupChatViewListener;
 import application.view.MainView;
 import application.view.PrivateChatViewListener;
 
 
-public class ChatClient implements PrivateChatViewListener, ReliableChannelListener, ReliableMulticastChannelListener, NetworkDiscoveryListener {
+public class ChatClient implements GroupChatViewListener, PrivateChatViewListener, ReliableChannelListener, ReliableMulticastChannelListener, NetworkDiscoveryListener {
 	private HashMap<NetworkDevice, ReliableChannel> channels;
 	
-	private ReliableMulticastChannel multicastChannel;
+	private WindowedChannel multicastChannel;
 	
 	private NetworkInterface networkInterface;
 	private NetworkDiscovery networkDiscovery;
@@ -92,7 +93,7 @@ public class ChatClient implements PrivateChatViewListener, ReliableChannelListe
 				out.write(Arrays.copyOfRange(bytes, position, bytes.length));
 			} catch (IOException e) { }
 			
-			mainView.newPrivateMessage(networkDiscovery.getNetworkDeviceByInetAddress(address), "\"" + buf.toString() + "\" (look in attachments folder)");
+			mainView.newPrivateMessage(networkDiscovery.getNetworkDeviceByInetAddress(address), "\"" + buf.toString() + "\"");
 		}
 	}
 	
@@ -104,8 +105,6 @@ public class ChatClient implements PrivateChatViewListener, ReliableChannelListe
 	@Override
 	public void onPrivateMessageSend(NetworkDevice device, String message) {
 		byte[] data = ("MSG " + message).getBytes();
-		
-		System.out.println(new String(data));
 		
 		channels.get(device).sendBytes(data);
 	}
@@ -119,9 +118,34 @@ public class ChatClient implements PrivateChatViewListener, ReliableChannelListe
 		System.arraycopy(b, 0, data, 0, b.length);
 		System.arraycopy(file, 0, data, b.length, file.length);
 		
-		System.out.println("file send");
-		
 		channels.get(device).sendBytes(data);
+	}
+	
+	@Override
+	public void onGroupMessageSend(String message) {
+		byte[] data = ("MSG " + message).getBytes();
+		
+		//multicastChannel.sendBytes(data);
+		
+		try {
+			multicastChannel.getOutputStream().write(data);
+			multicastChannel.getOutputStream().flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onGroupFileSend(byte[] file, String filename) {
+		byte[] b = ("FIL \"" + filename + "\" ").getBytes(); 
+		
+		byte[] data = new byte[b.length + file.length];
+		
+		System.arraycopy(b, 0, data, 0, b.length);
+		System.arraycopy(file, 0, data, b.length, file.length);
+		
+		//multicastChannel.sendBytes(data);
 	}
 	
 	public ChatClient(String identifier) throws IOException {
@@ -138,8 +162,9 @@ public class ChatClient implements PrivateChatViewListener, ReliableChannelListe
 		networkInterface = new NetworkInterface(InetAddress.getByName(group), port, InetAddress.getByName(localHost));
 		networkInterface.start();
 		
-		multicastChannel = new ReliableMulticastChannel(networkInterface);
-		multicastChannel.start();
+		multicastChannel = new WindowedChannel(InetAddress.getByName(localHost), networkInterface);
+		multicastChannel.addDeviceToChat(InetAddress.getByName(localHost));
+		//multicastChannel.start();
 		networkInterface.addNetworkListener(multicastChannel);
 		
 		networkDiscovery = new NetworkDiscovery(networkInterface, identifier);
