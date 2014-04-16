@@ -10,7 +10,7 @@ import network.NetworkListener;
 import network.NetworkPacket;
 
 public class ReliableChannel extends Thread implements NetworkListener {
-	private static final int MSS = 1; //256;
+	private static final int MSS = 64; //256;
 	private static final byte HOPCOUNT = 4;
 	
 	private InetAddress address;

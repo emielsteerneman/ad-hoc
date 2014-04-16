@@ -14,6 +14,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 
+import application.ChatClient;
 import network.NetworkDevice;
 
 
@@ -25,6 +26,8 @@ public class MainView extends JPanel {
 	private JScrollPane scrollPane;
 	private JTabbedPane chatsPane;
 	private JSplitPane splitPane;
+	
+	private ChatClient client;
 	
 	private GroupChatView groupChatTab;
 	private HashMap<NetworkDevice, PrivateChatView> privateChatTabs;
@@ -39,17 +42,22 @@ public class MainView extends JPanel {
 				
 				if (!privateChatTabs.containsKey(device)) {
 					PrivateChatView privateChatView = new PrivateChatView(identifier, device);
+					privateChatView.setPrivateChatViewListener(client);
 					
-					privateChatTabs.put(deviceList.getSelectedValue(), new PrivateChatView(identifier, device));
+					privateChatTabs.put(device, privateChatView);
 					
 					chatsPane.addTab(device.toString(), privateChatView);
+					chatsPane.setSelectedComponent(privateChatView);
+				} else {
+					chatsPane.setSelectedComponent(privateChatTabs.get(device));
 				}
 			}
 		}
 	}
 	
-	public MainView(String identifier) {
+	public MainView(String identifier, ChatClient client) {
 		this.identifier = identifier;
+		this.client = client;
 		
 		setLayout(new BorderLayout());
 		
@@ -76,12 +84,17 @@ public class MainView extends JPanel {
 		add(splitPane, BorderLayout.CENTER);
 	}
 	
-	public GroupChatView getGroupChatTab() {
-		return groupChatTab;
-	}
-	
-	public HashMap<NetworkDevice, PrivateChatView> getPrivateChatTabs() {
-		return privateChatTabs;
+	public void newPrivateMessage(NetworkDevice networkDevice, String message) {
+		if (!privateChatTabs.containsKey(networkDevice)) {
+			PrivateChatView privateChatView = new PrivateChatView(identifier, networkDevice);
+			privateChatView.setPrivateChatViewListener(client);
+			
+			privateChatTabs.put(networkDevice, privateChatView);
+			
+			chatsPane.addTab(networkDevice.toString(), privateChatView);
+		}
+		
+		privateChatTabs.get(networkDevice).addMessage(networkDevice.getIdentifier(), message);
 	}
 	
 	public void addNetworkDevice(NetworkDevice networkDevice) {

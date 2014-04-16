@@ -8,7 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -31,6 +32,7 @@ public class PrivateChatView extends JPanel {
 	
 	private String identifier;
 	private NetworkDevice networkDevice;
+	private PrivateChatViewListener listener;
 	
 	private JEditorPane textArea;
 	private HTMLEditorKit kit;
@@ -48,6 +50,10 @@ public class PrivateChatView extends JPanel {
 			inputTextField.setText("");
 			
 			if (message.length() > 0) {
+				if (listener != null) {
+					listener.onMessageSend(networkDevice, message);
+				}
+				
 				addMessage(identifier, message);
 			}
 		}
@@ -65,17 +71,17 @@ public class PrivateChatView extends JPanel {
 	        if (returnVal == JFileChooser.APPROVE_OPTION) {
 	            File file = fileChooser.getSelectedFile();
 	            
-	            byte[] data = new byte[0];
-	            
 	            try {
-					data = Files.readAllBytes(Paths.get(file.getPath()));
-				} catch (IOException e1) { }
-	            
-	            if (data.length > 0) {
-	            	System.out.println(Arrays.toString(data));
-	            	
-	            	addMessage(identifier, new String(data));
-	            }
+					byte[] data = Files.readAllBytes(Paths.get(file.getPath()));
+					
+					if (listener != null) {
+						listener.onFileSend(networkDevice, data, file.getName());
+					}
+					
+					addMessage(identifier, "\"" + file.getName() + "\" sent");
+				} catch (IOException e1) { 
+					addMessage(identifier, "failed sending \"" + file.getName() + "\"");
+				}
 	        }
 		}
 		
@@ -132,21 +138,30 @@ public class PrivateChatView extends JPanel {
 	}
 	
 	public void addMessage(String identifier, String message) {
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		
+		StringBuffer sb = new StringBuffer();
+    	
+    	sb.append("[");
+    	sb.append(sdf.format(calendar.getTime()));
+    	sb.append("] ");
+    	
+    	sb.append("<font color=\"red\">");
+    	sb.append("&lt;");
+    	sb.append(identifier);
+    	sb.append("&gt;");
+    	sb.append("</font> ");
+    	
+    	sb.append(message);
+    	
 		try {
-			kit.insertHTML(doc, doc.getLength(), "<b>" + identifier + "</b>: " + message, 0, 0, null);
+			kit.insertHTML(doc, doc.getLength(), sb.toString(), 0, 0, null);
 		} catch (BadLocationException | IOException e) { }
 	}
 	
-	public JTextField getInputTextField() {
-		return inputTextField;
-	}
-	
-	public JButton getSendButton() {
-		return sendButton;
-	}
-	
-	public JButton getFileInputButton() {
-		return fileInputButton;
+	public void setPrivateChatViewListener(PrivateChatViewListener listener) {
+		this.listener = listener;
 	}
 	
 }

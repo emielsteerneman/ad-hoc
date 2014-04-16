@@ -80,6 +80,16 @@ public class NetworkDiscovery implements NetworkListener {
 		}
 	}
 	
+	public NetworkDevice getNetworkDeviceByInetAddress(InetAddress address) {
+		for (NetworkDevice device : devices.keySet()) {
+			if (device.getAddress().equals(address)) {
+				return device;
+			}
+		}
+		
+		return null;
+	}
+	
 	public void setNetworkDiscoveryListener(NetworkDiscoveryListener networkDiscoveryListener) {
 		this.networkDiscoveryListener = networkDiscoveryListener;
 	}

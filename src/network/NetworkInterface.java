@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import network.routing.RoutingProtocol;
@@ -92,8 +93,8 @@ public class NetworkInterface extends Thread {
 				NetworkPacket networkPacket = NetworkPacket.parseBytes(Arrays.copyOfRange(packet.getData(), 0, packet.getLength()));
 				
 				if (networkPacket != null) {
-					//if (new Random().nextInt(10) == 0)
-						//continue;
+					if (new Random().nextInt(10) == 0)
+						continue;
 					
 					synchronized (localQueue) {
 						localQueue.add(networkPacket);
