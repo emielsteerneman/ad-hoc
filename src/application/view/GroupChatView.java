@@ -6,12 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 
 import javax.swing.JButton;
@@ -34,7 +31,7 @@ public class GroupChatView extends JPanel {
 	private final JFileChooser fileChooser;
 	
 	private String identifier;
-	private NetworkDevice networkDevice;
+	private GroupChatViewListener listener;
 	
 	private JEditorPane textArea;
 	private HTMLEditorKit kit;
@@ -52,6 +49,10 @@ public class GroupChatView extends JPanel {
 			inputTextField.setText("");
 			
 			if (message.length() > 0) {
+				if (listener != null) {
+					listener.onGroupMessageSend(message);
+				}
+				
 				addMessage(identifier, message);
 			}
 		}
@@ -62,32 +63,29 @@ public class GroupChatView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
-			
 			int returnVal = fileChooser.showOpenDialog(null);
 
 	        if (returnVal == JFileChooser.APPROVE_OPTION) {
 	            File file = fileChooser.getSelectedFile();
 	            
-	            byte[] data = new byte[0];
-	            
 	            try {
-					data = Files.readAllBytes(Paths.get(file.getPath()));
-				} catch (IOException e1) { }
-	            
-	            if (data.length > 0) {
-	            	System.out.println(Arrays.toString(data));
-	            	
-	            	addMessage(identifier, new String(data));
-	            }
+					byte[] data = Files.readAllBytes(Paths.get(file.getPath()));
+					
+					if (listener != null) {
+						listener.onGroupFileSend(data, file.getName());
+					}
+					
+					addMessage(identifier, "\"" + file.getName() + "\" sent");
+				} catch (IOException e1) { 
+					addMessage(identifier, "failed sending \"" + file.getName() + "\"");
+				}
 	        }
 		}
 		
 	}
 	
-	public GroupChatView(String identifier, NetworkDevice networkDevice) {
+	public GroupChatView(String identifier) {
 		this.identifier = identifier;
-		this.networkDevice = networkDevice;
 		
 		setLayout(new BorderLayout());
 		
@@ -202,18 +200,6 @@ public class GroupChatView extends JPanel {
     	try {
 			kit.insertHTML(doc, doc.getLength(), sb.toString(), 0, 0, null);
 		} catch (BadLocationException | IOException e) { }
-	}	
-	
-	public JTextField getInputTextField() {
-		return inputTextField;
-	}
-	
-	public JButton getSendButton() {
-		return sendButton;
-	}
-	
-	public JButton getFileInputButton() {
-		return fileInputButton;
 	}
 	
 }

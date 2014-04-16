@@ -92,7 +92,7 @@ public class ChatClient implements PrivateChatViewListener, ReliableChannelListe
 				out.write(Arrays.copyOfRange(bytes, position, bytes.length));
 			} catch (IOException e) { }
 			
-			mainView.newPrivateMessage(networkDiscovery.getNetworkDeviceByInetAddress(address), "\"" + buf.toString() + "\"");
+			mainView.newPrivateMessage(networkDiscovery.getNetworkDeviceByInetAddress(address), "\"" + buf.toString() + "\" (look in attachments folder)");
 		}
 	}
 	
@@ -102,7 +102,7 @@ public class ChatClient implements PrivateChatViewListener, ReliableChannelListe
 	}
 	
 	@Override
-	public void onMessageSend(NetworkDevice device, String message) {
+	public void onPrivateMessageSend(NetworkDevice device, String message) {
 		byte[] data = ("MSG " + message).getBytes();
 		
 		System.out.println(new String(data));
@@ -111,7 +111,7 @@ public class ChatClient implements PrivateChatViewListener, ReliableChannelListe
 	}
 
 	@Override
-	public void onFileSend(NetworkDevice device, byte[] file, String filename) {		
+	public void onPrivateFileSend(NetworkDevice device, byte[] file, String filename) {		
 		byte[] b = ("FIL \"" + filename + "\" ").getBytes(); 
 		
 		byte[] data = new byte[b.length + file.length];

@@ -61,7 +61,7 @@ public class MainView extends JPanel {
 		
 		setLayout(new BorderLayout());
 		
-		groupChatTab = new GroupChatView(identifier, null);
+		groupChatTab = new GroupChatView(identifier);
 		privateChatTabs = new HashMap<>();
 		
 		chatsPane = new JTabbedPane();
@@ -97,12 +97,22 @@ public class MainView extends JPanel {
 		privateChatTabs.get(networkDevice).addMessage(networkDevice.getIdentifier(), message);
 	}
 	
+	public void newGroupMessage(NetworkDevice networkDevice, String message) {
+		groupChatTab.addMessage(networkDevice.getIdentifier(), message);
+	}
+	
 	public void addNetworkDevice(NetworkDevice networkDevice) {
+		groupChatTab.addDevice(networkDevice);
 		deviceListModel.addElement(networkDevice);
 	}
 	
 	public void removeNetworkDevice(NetworkDevice networkDevice) {
+		groupChatTab.removeDevice(networkDevice);
 		deviceListModel.removeElement(networkDevice);
+		
+		if (privateChatTabs.containsKey(networkDevice)) {
+			chatsPane.remove(privateChatTabs.get(networkDevice));
+		}
 	}
 	
 }

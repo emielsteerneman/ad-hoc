@@ -51,7 +51,7 @@ public class PrivateChatView extends JPanel {
 			
 			if (message.length() > 0) {
 				if (listener != null) {
-					listener.onMessageSend(networkDevice, message);
+					listener.onPrivateMessageSend(networkDevice, message);
 				}
 				
 				addMessage(identifier, message);
@@ -64,8 +64,6 @@ public class PrivateChatView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
-			
 			int returnVal = fileChooser.showOpenDialog(null);
 
 	        if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -75,7 +73,7 @@ public class PrivateChatView extends JPanel {
 					byte[] data = Files.readAllBytes(Paths.get(file.getPath()));
 					
 					if (listener != null) {
-						listener.onFileSend(networkDevice, data, file.getName());
+						listener.onPrivateFileSend(networkDevice, data, file.getName());
 					}
 					
 					addMessage(identifier, "\"" + file.getName() + "\" sent");

@@ -3,6 +3,6 @@ package application.view;
 import network.NetworkDevice;
 
 public interface PrivateChatViewListener {
-	public void onMessageSend(NetworkDevice device, String message);
-	public void onFileSend(NetworkDevice device, byte[] file, String filename);
+	public void onPrivateMessageSend(NetworkDevice device, String message);
+	public void onPrivateFileSend(NetworkDevice device, byte[] file, String filename);
 }
