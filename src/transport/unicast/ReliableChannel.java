@@ -11,7 +11,7 @@ import network.NetworkPacket;
 
 public class ReliableChannel extends Thread implements NetworkListener {
 	private static final int MSS = 256;
-	private static final byte HOPCOUNT = 4;
+	private static final byte HOPCOUNT = 3;
 	
 	private InetAddress address;
 	private NetworkInterface networkInterface;
@@ -74,8 +74,8 @@ public class ReliableChannel extends Thread implements NetworkListener {
 	
 	@Override
 	public synchronized void onReceive(NetworkPacket packet) {
-		if (packet.isFlagSet(NetworkPacket.TRANSPORT)) {
-			if (packet.getDestinationAddresses().contains(address) && !packet.isFlagSet(NetworkPacket.MULTICAST)) {
+		if (packet.isFlagSet(NetworkPacket.TRANSPORT)) {			
+			if (packet.getDestinationAddresses().contains(networkInterface.getLocalHost()) && packet.getSourceAddress().equals(address) && !packet.isFlagSet(NetworkPacket.MULTICAST)) {
 				TransportPacket transportPacket = TransportPacket.parseBytes(packet.getData());
 				
 				if (transportPacket != null) {

@@ -113,6 +113,7 @@ public class MainView extends JPanel {
 		
 		if (privateChatTabs.containsKey(networkDevice)) {
 			chatsPane.remove(privateChatTabs.get(networkDevice));
+			privateChatTabs.remove(networkDevice);
 		}
 	}
 	

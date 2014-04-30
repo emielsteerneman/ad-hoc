@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,7 +15,7 @@ import network.NetworkPacket;
 
 public class NetworkDiscovery implements NetworkListener {
 	private static final int DELAY = 500;
-	private static final int TIMEOUT = 5;
+	private static final int TIMEOUT = 10;
 	
 	private NetworkInterface networkInterface;
 	private String identifier;
@@ -32,18 +33,22 @@ public class NetworkDiscovery implements NetworkListener {
 			NetworkPacket networkPacket = new NetworkPacket(networkInterface.getLocalHost(), new ArrayList<InetAddress>(), NetworkInterface.HOPCOUNT, identifier.getBytes());
 			networkPacket.setFlags(NetworkPacket.ARP);
 			
+			HashSet<NetworkDevice> remove = new HashSet<NetworkDevice>();
 			for (NetworkDevice device : devices.keySet()) {
 				int TTL = devices.get(device) - 1;
 				
 				if (TTL > 0) {
 					devices.put(device, TTL);
 				} else {
-					devices.remove(device);
+					remove.add(device);
 					
 					if (networkDiscoveryListener != null) {
 						networkDiscoveryListener.onDeviceTimeout(device);
 					}
 				}
+			}
+			for(NetworkDevice dev : remove){
+				devices.remove(dev);
 			}
 			
 			try {

@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import network.routing.RoutingProtocol;
@@ -23,8 +23,7 @@ public class NetworkInterface extends Thread {
 	private int port;
 	private InetAddress group;
 	
-	//private MulticastSocket receiveSocket;
-	private DatagramSocket receiveSocket;
+	private MulticastSocket receiveSocket;
 	private DatagramSocket sendSocket;	
 	
 	private InetAddress localHost;
@@ -61,9 +60,8 @@ public class NetworkInterface extends Thread {
 		this.group = group;
 		this.port = port;
 		
-		//this.receiveSocket = new MulticastSocket(port);
-		//this.receiveSocket.joinGroup(group);
-		this.receiveSocket = new DatagramSocket(port);
+		this.receiveSocket = new MulticastSocket(port);
+		this.receiveSocket.joinGroup(group);
 		this.receiveSocket.setSoTimeout(TIME_OUT);
 		this.sendSocket = new DatagramSocket();
 		
@@ -93,12 +91,14 @@ public class NetworkInterface extends Thread {
 				NetworkPacket networkPacket = NetworkPacket.parseBytes(Arrays.copyOfRange(packet.getData(), 0, packet.getLength()));
 				
 				if (networkPacket != null) {
-					if (new Random().nextInt(10) == 0)
-						continue;
+//					if (new Random().nextInt(10) == 0)
+//						continue;
 					
 					synchronized (localQueue) {
 						localQueue.add(networkPacket);
 						localQueue.notify();
+						
+						System.out.println("QUEUE SIZE" + localQueue.size());
 					}
 				}
 			}

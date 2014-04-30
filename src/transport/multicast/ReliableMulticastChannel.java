@@ -12,8 +12,8 @@ import network.NetworkListener;
 import network.NetworkPacket;
 
 public class ReliableMulticastChannel extends Thread implements NetworkListener {
-	private static final int MSS = 1; //256;
-	private static final byte HOPCOUNT = 4;	
+	private static final int MSS = 256;
+	private static final byte HOPCOUNT = 3;	
 	
 	private HashMap<InetAddress, Boolean> devices;
 	
